@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/devel
+
+Name: model
+Description: Description of model
+Version: 1.0.0
+Cflags: 
+Libs: -L/home/pi/catkin_qi/devel/lib 
+Requires: 

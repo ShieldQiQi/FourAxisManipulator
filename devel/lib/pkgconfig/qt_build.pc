@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/devel
+
+Name: qt_build
+Description: Description of qt_build
+Version: 0.2.10
+Cflags: 
+Libs: -L/home/pi/catkin_qi/devel/lib 
+Requires: 

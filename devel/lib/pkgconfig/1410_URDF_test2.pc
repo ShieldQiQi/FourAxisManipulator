@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/devel
+
+Name: 1410_URDF_test2
+Description: Description of 1410_URDF_test2
+Version: 1.0.0
+Cflags: 
+Libs: -L/home/pi/catkin_qi/devel/lib 
+Requires: 

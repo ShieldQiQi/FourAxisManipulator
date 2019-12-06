@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/devel
+
+Name: abb_moveit_config
+Description: Description of abb_moveit_config
+Version: 0.3.0
+Cflags: 
+Libs: -L/home/pi/catkin_qi/devel/lib 
+Requires: 

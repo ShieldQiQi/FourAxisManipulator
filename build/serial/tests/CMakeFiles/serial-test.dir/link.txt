@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/serial-test.dir/unix_serial_tests.cc.o  -o /home/pi/catkin_qi/devel/lib/serial/serial-test -Wl,-rpath,/home/pi/catkin_qi/devel/lib -Wl,-Bstatic -lgtest -Wl,-Bdynamic /home/pi/catkin_qi/devel/lib/libserial.so -lutil -lrt -lpthread 

@@ -1,0 +1,2 @@
+abb_1410_moveit_config/1410_URDF_test2:abb_1410_moveit_config/abb_moveit_config:catkin:fam:model:qt_ros/qt_build:qt_ros/qt_create:qt_ros/qt_ros:qt_ros/qt_tutorials:qtui:serial
+-DCATKIN_DEVEL_PREFIX=/home/pi/catkin_qi/devel -DCMAKE_INSTALL_PREFIX=/home/pi/catkin_qi/install -G Unix Makefiles

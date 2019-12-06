@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/install
+
+Name: qt_tutorials
+Description: Description of qt_tutorials
+Version: 0.2.10
+Cflags: -I/home/pi/catkin_qi/install/include
+Libs: -L/home/pi/catkin_qi/install/lib 
+Requires: message_runtime std_msgs roscpp

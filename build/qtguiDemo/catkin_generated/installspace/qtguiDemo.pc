@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/install
+
+Name: qtguiDemo
+Description: Description of qtguiDemo
+Version: 0.1.0
+Cflags: 
+Libs: -L/home/pi/catkin_qi/install/lib 
+Requires: 

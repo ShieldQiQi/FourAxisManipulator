@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/devel
+
+Name: serial
+Description: Description of serial
+Version: 1.2.1
+Cflags: -I/home/pi/catkin_qi/src/serial/include
+Libs: -L/home/pi/catkin_qi/devel/lib -lserial
+Requires: 

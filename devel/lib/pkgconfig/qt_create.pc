@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/devel
+
+Name: qt_create
+Description: Description of qt_create
+Version: 0.2.10
+Cflags: 
+Libs: -L/home/pi/catkin_qi/devel/lib 
+Requires: 

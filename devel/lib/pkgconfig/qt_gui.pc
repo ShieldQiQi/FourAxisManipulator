@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/devel
+
+Name: qt_gui
+Description: Description of qt_gui
+Version: 0.1.0
+Cflags: 
+Libs: -L/home/pi/catkin_qi/devel/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_qi/install
+
+Name: catkin
+Description: Description of catkin
+Version: 0.7.18
+Cflags: 
+Libs: -L/home/pi/catkin_qi/install/lib 
+Requires: 
