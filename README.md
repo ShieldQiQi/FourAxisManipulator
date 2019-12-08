@@ -4,6 +4,7 @@
 
 ### Finish transport a Chinese string from `Qt widget` to `Ros` stream then to `Freetype` demo
 <br>
+
 ### Solve the problem that the newest text carry the before one.
 <br>
 According to the offical doucuments:
