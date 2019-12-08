@@ -13,15 +13,30 @@
 #include <math.h>
 #include <iostream>
 #include <wchar.h>
+#include <stdlib.h>
+#include <locale.h>
 
 #define WIDTH   200
 #define HEIGHT  30
 /* origin is the upper left corner */
 unsigned char image[HEIGHT][WIDTH];
+std_msgs::Float64 hipAngle;
+FT_Library    library;
+FT_Face       face;
+FT_GlyphSlot  slot;
+FT_Matrix     matrix;                
+FT_Vector     pen;                  
+FT_Error      error;
+char*         filename;
+wchar_t       *wcharText = L"齐";
+double        angle;
+int           target_height;
+int           n, num_chars;
+	
+static uint8_t s_buffer[5];
+serial::Serial ser; //声明串口对象 
 
 using namespace std;
-
-std_msgs::Float64 hipAngle;
 
 void draw_bitmap( FT_Bitmap*  bitmap, FT_Int x, FT_Int y)
 {
@@ -55,20 +70,56 @@ void show_image( void )
   }
 }
 
+std::wstring s2ws(const std::string& s)
+{
+	setlocale(LC_ALL,"zh_CN.UTF-8");
+	
+	const char* _Source = s.c_str();
+	size_t _Dsize = s.size() + 1;
 
-static uint8_t s_buffer[5];
-serial::Serial ser; //声明串口对象 
+	wchar_t *_Dest = new wchar_t[_Dsize];
+	wmemset(_Dest, 0, _Dsize);
+	mbstowcs(_Dest, _Source, _Dsize);
+	std::wstring result = _Dest;
+	delete[]_Dest;
+	setlocale(LC_ALL, "C");
+	return result;
 
-//回调函数 
+}
+
+//---------------------------------------------------
+//话题回调
 void write_callback(const std_msgs::Float64MultiArray angleArray) 
 { 
 	ROS_INFO("I heard: [%f]", angleArray.data.at(0));
 	hipAngle.data =  angleArray.data.at(0);
 }
 
-void readTextString_callback(const std_msgs::String textString) 
-{ 
-	std::cout<<textString.data<<std::endl;
+void readTextString_callback(std_msgs::String textString) 
+{ 		
+	//std_msgs::String  ---->  std::string   ------> std::wstring -------> const wchar_t*
+	
+	string testStr(textString.data);
+	wstring wstrData;
+	wstrData = s2ws(testStr);
+	const wchar_t* pWstrData = wstrData.c_str();
+	 
+	//draw the text to bitmap
+	num_chars = wcslen(pWstrData);
+	for ( n = 0; n < num_chars; n++ )
+	{
+		FT_Set_Transform( face, &matrix, &pen );
+		error = FT_Load_Char( face, pWstrData[n], FT_LOAD_RENDER );
+		if ( error )
+		  continue;
+		draw_bitmap( &slot->bitmap,
+					 slot->bitmap_left,
+					 target_height - slot->bitmap_top );
+
+		pen.x += slot->advance.x;
+		pen.y += slot->advance.y;
+	}
+	show_image();		
 }
 
 //---------------------------------------------------------------------------------------------
@@ -76,20 +127,10 @@ void readTextString_callback(const std_msgs::String textString)
 int main (int argc, char** argv)
 { 
 	
-	FT_Library    library;
-	FT_Face       face;
-	FT_GlyphSlot  slot;
-	FT_Matrix     matrix;                
-	FT_Vector     pen;                  
-	FT_Error      error;
-	char*         filename;
-	wchar_t 		*chinese_char = L"齐Qi";
-	double        angle;
-	int           target_height;
-	int           n, num_chars;
+	//---------------------------------------------------
+	//Init the FreeType
 	
 	filename = "/usr/share/fonts/truetype/兰亭黑简.TTF";
-	num_chars     = wcslen(chinese_char);
 
 	angle         = ( 0 / 360 ) * 3.14159 * 2;        
 	target_height = HEIGHT;
@@ -107,30 +148,14 @@ int main (int argc, char** argv)
 	pen.x = 15 * 64;
 	pen.y = ( target_height - 22 ) * 64;
 	
-	for ( n = 0; n < num_chars; n++ )
-	{
-	FT_Set_Transform( face, &matrix, &pen );
-	error = FT_Load_Char( face, chinese_char[n], FT_LOAD_RENDER );
-	if ( error )
-	  continue;      
-	draw_bitmap( &slot->bitmap,
-				 slot->bitmap_left,
-				 target_height - slot->bitmap_top );
-
-	pen.x += slot->advance.x;
-	pen.y += slot->advance.y;
-	}
-	show_image();	
-	
-	//初始化节点 
+	//---------------------------------------------------
+	//Init the ROS node 
 	ros::init(argc, argv, "SerialTalker"); 
-	//声明节点句柄 
 	ros::NodeHandle nh; 
 	//订阅话题，将角度命令发送至驱动板执行
 	ros::Subscriber write_sub = nh.subscribe("Qt_Msg", 1000, write_callback); 
 	//订阅QT话题，接收字符串
 	ros::Subscriber textString_sub = nh.subscribe("Qt_textString", 1000, readTextString_callback); 
-	
 	//发布主题 
 	ros::Publisher read_pub = nh.advertise<std_msgs::Int32>("stm_publish", 1000); 
 	try 
@@ -156,6 +181,8 @@ int main (int argc, char** argv)
 	{ 
 		//return -1; 
 	}
+	
+	//---------------------------------------------------
 	//指定循环的频率 
 	ros::Rate loop_rate(50); 
 	while(ros::ok()) 
@@ -171,6 +198,9 @@ int main (int argc, char** argv)
 	  //ser.write(s_buffer,1);   //发送串口数据
 	  ros::spinOnce();
 	}
+	
+	
+	//Exit and delete the Freetype value
 	FT_Done_Face    ( face );
 	FT_Done_FreeType( library );
 }

@@ -35,6 +35,10 @@ iostream
 -
 wchar.h
 -
+stdlib.h
+-
+locale.h
+-
 
 /home/pi/catkin_qi/src/serial/include/serial/serial.h
 limits

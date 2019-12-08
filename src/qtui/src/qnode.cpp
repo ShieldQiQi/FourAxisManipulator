@@ -74,13 +74,19 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 void QNode::run() {
 	ros::Rate loop_rate(1);
 	int count = 0;
+	std_msgs::String stringBefore;
 	while ( ros::ok() ) {
 
 		std_msgs::String msg;
 		std::stringstream ss;
 		
 		chatter_publisher.publish(angleArray);
-		textString_publisher.publish(this->textString);
+		
+		if(stringBefore.data != this->textString.data){
+			textString_publisher.publish(this->textString);
+			std::cout<<this->textString.data<<std::endl;
+		}
+		stringBefore.data = this->textString.data;
 		
 		ss << angleArray.data.at(0) << " " << angleArray.data.at(1) << " " << angleArray.data.at(2) 
 			<< " " << angleArray.data.at(3) << " " << angleArray.data.at(4) << " " << angleArray.data.at(5);

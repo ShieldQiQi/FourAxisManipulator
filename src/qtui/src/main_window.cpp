@@ -115,6 +115,11 @@ void MainWindow::on_button_connectRos_clicked()
 
 void MainWindow::on_button_writeStart_clicked() 
 {    
+    //设置编码
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    
     qnode.textString.data = ui.textInput->toPlainText().toStdString().data();
 }
 
