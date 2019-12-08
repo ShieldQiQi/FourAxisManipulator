@@ -9,6 +9,7 @@
 <br>
 According to the offical doucuments:
 <br>
+```c++
   /**************************************************************************
    *
    * @type:
@@ -38,5 +39,6 @@ According to the offical doucuments:
    *   See @FT_FaceRec for the publicly accessible fields of a given face
    *   object.
    */
+```
 <br>
 So when in the case you frequently use the function, destory the face use "FT_Done_Face(face)" and make sure the image buffer is cleared to all zero.
