@@ -106,6 +106,11 @@ void readTextString_callback(std_msgs::String textString)
 	 
 	//draw the text to bitmap
 	num_chars = wcslen(pWstrData);
+	
+	FT_New_Face( library, filename, 0, &face );
+	FT_Set_Char_Size( face, 30 * 64, 10*64, 200, 0 );
+	slot = face->glyph;
+	
 	for ( n = 0; n < num_chars; n++ )
 	{
 		FT_Set_Transform( face, &matrix, &pen );
@@ -119,7 +124,14 @@ void readTextString_callback(std_msgs::String textString)
 		pen.x += slot->advance.x;
 		pen.y += slot->advance.y;
 	}
-	show_image();		
+	show_image();
+	
+	pen.x = 15 * 64;
+	pen.y = ( target_height - 22 ) * 64;
+	FT_Done_Face(face);
+	for(int i = 0;i<WIDTH; i++)
+		for(int j =0;j<HEIGHT;j++)
+			image[j][i] = 0;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -129,24 +141,15 @@ int main (int argc, char** argv)
 	
 	//---------------------------------------------------
 	//Init the FreeType
-	
 	filename = "/usr/share/fonts/truetype/兰亭黑简.TTF";
-
 	angle         = ( 0 / 360 ) * 3.14159 * 2;        
 	target_height = HEIGHT;
-	error = FT_Init_FreeType( &library ); 
-	error = FT_New_Face( library, filename, 0, &face );
-	error = FT_Set_Char_Size( face, 30 * 64, 10*64,
-							200, 0 );
-	slot = face->glyph;
+	FT_Init_FreeType( &library ); 
 	
 	matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
 	matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L );
 	matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
 	matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
-
-	pen.x = 15 * 64;
-	pen.y = ( target_height - 22 ) * 64;
 	
 	//---------------------------------------------------
 	//Init the ROS node 
@@ -201,6 +204,5 @@ int main (int argc, char** argv)
 	
 	
 	//Exit and delete the Freetype value
-	FT_Done_Face    ( face );
 	FT_Done_FreeType( library );
 }
