@@ -9,3 +9,9 @@
 According to the offical doucuments<br>
 ![image] https://github.com/ShieldQiQi/FourAxisManipulator/blob/master/Picture/FreetypeDocument.png
 <br>So when in the case you frequently use the function, destory the face use "FT_Done_Face(face)" and make sure the image buffer is cleared to all zero.
+
+
+## 2019/12/11
+
+### add RVIZ visualization of the Text
+
