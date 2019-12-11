@@ -2,7 +2,7 @@
 
 message(STATUS "fam: 1 messages, 1 services")
 
-set(MSG_I_FLAGS "-Ifam:/home/pi/catkin_qi/src/fam/msg;-Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg;-Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg")
+set(MSG_I_FLAGS "-Ifam:/home/pi/catkin_qi/src/fam/msg;-Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg;-Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg;-Ivisualization_msgs:/opt/ros/kinetic/share/visualization_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg")
 
 # Find all generators
 find_package(gencpp REQUIRED)
@@ -251,6 +251,9 @@ endif()
 if(TARGET sensor_msgs_generate_messages_cpp)
   add_dependencies(fam_generate_messages_cpp sensor_msgs_generate_messages_cpp)
 endif()
+if(TARGET visualization_msgs_generate_messages_cpp)
+  add_dependencies(fam_generate_messages_cpp visualization_msgs_generate_messages_cpp)
+endif()
 
 if(geneus_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/fam)
   # install generated code
@@ -264,6 +267,9 @@ if(TARGET std_msgs_generate_messages_eus)
 endif()
 if(TARGET sensor_msgs_generate_messages_eus)
   add_dependencies(fam_generate_messages_eus sensor_msgs_generate_messages_eus)
+endif()
+if(TARGET visualization_msgs_generate_messages_eus)
+  add_dependencies(fam_generate_messages_eus visualization_msgs_generate_messages_eus)
 endif()
 
 if(genlisp_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/fam)
@@ -279,6 +285,9 @@ endif()
 if(TARGET sensor_msgs_generate_messages_lisp)
   add_dependencies(fam_generate_messages_lisp sensor_msgs_generate_messages_lisp)
 endif()
+if(TARGET visualization_msgs_generate_messages_lisp)
+  add_dependencies(fam_generate_messages_lisp visualization_msgs_generate_messages_lisp)
+endif()
 
 if(gennodejs_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/fam)
   # install generated code
@@ -292,6 +301,9 @@ if(TARGET std_msgs_generate_messages_nodejs)
 endif()
 if(TARGET sensor_msgs_generate_messages_nodejs)
   add_dependencies(fam_generate_messages_nodejs sensor_msgs_generate_messages_nodejs)
+endif()
+if(TARGET visualization_msgs_generate_messages_nodejs)
+  add_dependencies(fam_generate_messages_nodejs visualization_msgs_generate_messages_nodejs)
 endif()
 
 if(genpy_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/fam)
@@ -307,4 +319,7 @@ if(TARGET std_msgs_generate_messages_py)
 endif()
 if(TARGET sensor_msgs_generate_messages_py)
   add_dependencies(fam_generate_messages_py sensor_msgs_generate_messages_py)
+endif()
+if(TARGET visualization_msgs_generate_messages_py)
+  add_dependencies(fam_generate_messages_py visualization_msgs_generate_messages_py)
 endif()

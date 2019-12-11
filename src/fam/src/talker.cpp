@@ -1,3 +1,9 @@
+/****************************************************************************
+ * Project:Six axis manipulator
+ * Author:Qi
+ * Created Time:2019/12/11
+ * *****************************/
+ 
 #include <ros/ros.h> 
 #include <serial/serial.h>
 #include <std_msgs/String.h> 
@@ -15,6 +21,9 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <locale.h>
+#include <visualization_msgs/Marker.h>
+#include <cmath>
+#include <tf/transform_broadcaster.h>
 
 #define WIDTH   200
 #define HEIGHT  30
@@ -32,9 +41,11 @@ wchar_t       *wcharText = L"齐";
 double        angle;
 int           target_height;
 int           n, num_chars;
-	
+
 static uint8_t s_buffer[5];
 serial::Serial ser; //声明串口对象 
+
+visualization_msgs::Marker points;
 
 using namespace std;
 
@@ -64,7 +75,7 @@ void show_image( void )
   {
     for ( j = 0; j < WIDTH; j++ )
       putchar( image[i][j] == 0 ? ' '
-                                : image[i][j] < 128 ? '+'
+                                : image[i][j] < 128 ? '*'
                                                     : '*' );
     putchar( '\n' );
   }
@@ -93,6 +104,43 @@ void write_callback(const std_msgs::Float64MultiArray angleArray)
 { 
 	ROS_INFO("I heard: [%f]", angleArray.data.at(0));
 	hipAngle.data =  angleArray.data.at(0);
+}
+
+//---------------------------------------------------
+//更新文字在RVIZ中的显示
+void updatePoints(visualization_msgs::Marker &points)
+{
+	points.points.clear();
+	
+	points.header.frame_id  = "/textFrame";
+	points.header.stamp = ros::Time::now();
+	points.ns = "textPoints";
+	points.action = visualization_msgs::Marker::ADD;
+	points.pose.orientation.w = 1.0;
+	points.id = 0;
+	points.type = visualization_msgs::Marker::POINTS;
+	// POINTS markers use x and y scale for width/height respectively
+	points.scale.x = 0.02;
+	points.scale.y = 0.02;
+	// Points are green
+	points.color.g = 1.0f;
+	points.color.b = 0.7f;
+	points.color.a = 1.0;
+	
+	for (int i = 0; i < WIDTH; ++i)
+	{
+		for(int j =0;j<HEIGHT;j++)
+		{
+			if(image[j][i] != 0){
+				geometry_msgs::Point p;
+				p.x = 0.08*j;
+				p.y = 0.04*i;
+				p.z = 0;
+
+				points.points.push_back(p);
+			}
+		}
+	}
 }
 
 void readTextString_callback(std_msgs::String textString) 
@@ -126,6 +174,8 @@ void readTextString_callback(std_msgs::String textString)
 	}
 	show_image();
 	
+	updatePoints(points);
+	
 	pen.x = 15 * 64;
 	pen.y = ( target_height - 22 ) * 64;
 	FT_Done_Face(face);
@@ -138,9 +188,24 @@ void readTextString_callback(std_msgs::String textString)
 
 int main (int argc, char** argv)
 { 
+	//------------------------------------------------------------------
+	//Init the ROS node 
+	ros::init(argc, argv, "SerialTalker"); 
+	ros::NodeHandle nh; 
+	//订阅话题，将角度命令发送至驱动板执行
+	ros::Subscriber write_sub = nh.subscribe("Qt_Msg", 1000, write_callback); 
+	//订阅QT话题，接收字符串
+	ros::Subscriber textString_sub = nh.subscribe("Qt_textString", 1000, readTextString_callback); 
+	//发布话题
+	ros::Publisher read_pub = nh.advertise<std_msgs::Int32>("stm_publish", 1000); 
+	//Init the Marker(textPoint) in RVIZ 
+	ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
+	//添加RVIZ默认坐标系和Maker坐标系textFrame的坐标系转换关系
+	tf::TransformBroadcaster broadcaster;
 	
-	//---------------------------------------------------
+	//------------------------------------------------------------------
 	//Init the FreeType
+	
 	filename = "/usr/share/fonts/truetype/兰亭黑简.TTF";
 	angle         = ( 0 / 360 ) * 3.14159 * 2;        
 	target_height = HEIGHT;
@@ -150,17 +215,10 @@ int main (int argc, char** argv)
 	matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L );
 	matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
 	matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
+
+	//------------------------------------------------------------------
+	//Init Serial Port communicating with stm32
 	
-	//---------------------------------------------------
-	//Init the ROS node 
-	ros::init(argc, argv, "SerialTalker"); 
-	ros::NodeHandle nh; 
-	//订阅话题，将角度命令发送至驱动板执行
-	ros::Subscriber write_sub = nh.subscribe("Qt_Msg", 1000, write_callback); 
-	//订阅QT话题，接收字符串
-	ros::Subscriber textString_sub = nh.subscribe("Qt_textString", 1000, readTextString_callback); 
-	//发布主题 
-	ros::Publisher read_pub = nh.advertise<std_msgs::Int32>("stm_publish", 1000); 
 	try 
 	{
 		//设置串口属性，并打开串口 
@@ -185,10 +243,11 @@ int main (int argc, char** argv)
 		//return -1; 
 	}
 	
-	//---------------------------------------------------
+	//------------------------------------------------------------------
 	//指定循环的频率 
+	
 	ros::Rate loop_rate(50); 
-	while(ros::ok()) 
+	while(ros::ok())
 	{
 		if(ser.available()){
 			std_msgs::String result; 
@@ -196,13 +255,57 @@ int main (int argc, char** argv)
 			int number = result.data[0]-' '+32;
 			cout<< number << endl;
 			//read_pub.publish(number);
-	  }
-	  s_buffer[0] = (uint8_t)hipAngle.data;
-	  //ser.write(s_buffer,1);   //发送串口数据
-	  ros::spinOnce();
+		}
+		s_buffer[0] = (uint8_t)hipAngle.data;
+		//ser.write(s_buffer,1);
+		
+		broadcaster.sendTransform(tf::StampedTransform( tf::Transform(tf::Quaternion(0, 0, 0, 1), 
+									tf::Vector3(0.0, 0.0, 0.0)),ros::Time::now(),"map", "textFrame"));
+		marker_pub.publish(points);			
+									
+		//loop_rate.sleep();
+		ros::spinOnce();
+
 	}
-	
-	
+
+	//------------------------------------------------------------------
 	//Exit and delete the Freetype value
 	FT_Done_FreeType( library );
 }
+
+
+/*******************************************************************************************************************
+ * End Of File
+ * ************************************/
+
+
+	//~ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud> ("pcl_output", 50);
+	//~sensor_msgs::PointCloud output;
+	//~output.header.stamp = ros::Time::now();
+	//~output.header.frame_id = "pointcloud";
+	//~output.points.resize(50);
+	//~output.channels.resize(1);
+	//~output.channels[0].name = "intensities";
+	//~output.channels[0].values.resize(50);
+	//geometry_msgs::Point32 points[50];
+	//~for(int i = 0 ;i<50;i++){
+		//~output.points[i].z = 0;
+		//~output.points[i].x = i;
+		//~output.points[i].y = 50-i;
+		//~output.channels[0].values[i] = 100;
+	//~}
+	//~output.points = points;
+	
+	//~ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pcl_output", 50);
+	//~sensor_msgs::PointCloud2 output;
+	//~std::vector<sensor_msgs::PointField>  pointfields;
+	//~output.header.stamp = ros::Time::now();
+	//~output.header.frame_id = "map";//"textFrame";
+	//~output.fields = pointfields;
+	//~output.height = 1;
+	//~output.width = 3356;
+	//~output.data = {12 ,45 ,45 ,45 ,15 ,22 ,14};
+	//~output.is_bigendian = false;
+	//~output.point_step = 16;
+	//~output.row_step = 53696;
+	//~output.is_dense = true;

@@ -9,6 +9,9 @@ find_package(catkin REQUIRED COMPONENTS
   serial
   message_generation
   robot_state_publisher
+  tf
+  visualization_msgs
+  #~PCL REQUIRED
 )
 
  add_message_files(
@@ -26,6 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
    DEPENDENCIES
    std_msgs
    sensor_msgs
+   visualization_msgs
  )
 
 catkin_package(

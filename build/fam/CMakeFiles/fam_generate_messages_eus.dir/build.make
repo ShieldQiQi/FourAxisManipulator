@@ -61,16 +61,16 @@ fam/CMakeFiles/fam_generate_messages_eus: /home/pi/catkin_qi/devel/share/roseus/
 /home/pi/catkin_qi/devel/share/roseus/ros/fam/msg/Num.l: /opt/ros/kinetic/lib/geneus/gen_eus.py
 /home/pi/catkin_qi/devel/share/roseus/ros/fam/msg/Num.l: /home/pi/catkin_qi/src/fam/msg/Num.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_qi/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating EusLisp code from fam/Num.msg"
-	cd /home/pi/catkin_qi/build/fam && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/pi/catkin_qi/src/fam/msg/Num.msg -Ifam:/home/pi/catkin_qi/src/fam/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p fam -o /home/pi/catkin_qi/devel/share/roseus/ros/fam/msg
+	cd /home/pi/catkin_qi/build/fam && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/pi/catkin_qi/src/fam/msg/Num.msg -Ifam:/home/pi/catkin_qi/src/fam/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Ivisualization_msgs:/opt/ros/kinetic/share/visualization_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p fam -o /home/pi/catkin_qi/devel/share/roseus/ros/fam/msg
 
 /home/pi/catkin_qi/devel/share/roseus/ros/fam/srv/AddTwoInts.l: /opt/ros/kinetic/lib/geneus/gen_eus.py
 /home/pi/catkin_qi/devel/share/roseus/ros/fam/srv/AddTwoInts.l: /home/pi/catkin_qi/src/fam/srv/AddTwoInts.srv
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_qi/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating EusLisp code from fam/AddTwoInts.srv"
-	cd /home/pi/catkin_qi/build/fam && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/pi/catkin_qi/src/fam/srv/AddTwoInts.srv -Ifam:/home/pi/catkin_qi/src/fam/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p fam -o /home/pi/catkin_qi/devel/share/roseus/ros/fam/srv
+	cd /home/pi/catkin_qi/build/fam && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/pi/catkin_qi/src/fam/srv/AddTwoInts.srv -Ifam:/home/pi/catkin_qi/src/fam/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg -Ivisualization_msgs:/opt/ros/kinetic/share/visualization_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg -p fam -o /home/pi/catkin_qi/devel/share/roseus/ros/fam/srv
 
 /home/pi/catkin_qi/devel/share/roseus/ros/fam/manifest.l: /opt/ros/kinetic/lib/geneus/gen_eus.py
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_qi/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating EusLisp manifest code for fam"
-	cd /home/pi/catkin_qi/build/fam && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py -m -o /home/pi/catkin_qi/devel/share/roseus/ros/fam fam std_msgs sensor_msgs
+	cd /home/pi/catkin_qi/build/fam && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py -m -o /home/pi/catkin_qi/devel/share/roseus/ros/fam fam std_msgs sensor_msgs visualization_msgs
 
 fam_generate_messages_eus: fam/CMakeFiles/fam_generate_messages_eus
 fam_generate_messages_eus: /home/pi/catkin_qi/devel/share/roseus/ros/fam/msg/Num.l

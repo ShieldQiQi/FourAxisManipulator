@@ -267,6 +267,9 @@ LSB_RELEASE_EXECUTABLE:FILEPATH=/usr/bin/lsb_release
 //Path to a program.
 NOSETESTS:FILEPATH=/usr/bin/nosetests-2.7
 
+//The directory containing a CMake configuration file for PCL.
+PCL_DIR:PATH=PCL_DIR-NOTFOUND
+
 //Path to a program.
 PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python
 
@@ -970,7 +973,7 @@ geometry_msgs_DIR:PATH=/opt/ros/kinetic/share/geometry_msgs/cmake
 kdl_parser_DIR:PATH=/opt/ros/kinetic/share/kdl_parser/cmake
 
 //Path to a library.
-lib:FILEPATH=/opt/ros/kinetic/lib/librosconsole_bridge.so
+lib:FILEPATH=/opt/ros/kinetic/lib/libtf.so
 
 //The directory containing a CMake configuration file for message_filters.
 message_filters_DIR:PATH=/opt/ros/kinetic/share/message_filters/cmake
@@ -986,6 +989,18 @@ model_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/model
 
 //Value Computed by CMake
 model_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/model
+
+//Value Computed by CMake
+pcl_conversions_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/perception_pcl/pcl_conversions
+
+//Value Computed by CMake
+pcl_conversions_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/perception_pcl/pcl_conversions
+
+//Value Computed by CMake
+perception_pcl_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/perception_pcl/perception_pcl
+
+//Value Computed by CMake
+perception_pcl_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/perception_pcl/perception_pcl
 
 //Value Computed by CMake
 qt_build_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/qt_ros/qt_build
@@ -1101,8 +1116,14 @@ tf2_py_DIR:PATH=/opt/ros/kinetic/share/tf2_py/cmake
 //The directory containing a CMake configuration file for tf2_ros.
 tf2_ros_DIR:PATH=/opt/ros/kinetic/share/tf2_ros/cmake
 
+//The directory containing a CMake configuration file for tf.
+tf_DIR:PATH=/opt/ros/kinetic/share/tf/cmake
+
 //The directory containing a CMake configuration file for urdf.
 urdf_DIR:PATH=/opt/ros/kinetic/share/urdf/cmake
+
+//The directory containing a CMake configuration file for visualization_msgs.
+visualization_msgs_DIR:PATH=/opt/ros/kinetic/share/visualization_msgs/cmake
 
 //The directory containing a CMake configuration file for xmlrpcpp.
 xmlrpcpp_DIR:PATH=/opt/ros/kinetic/share/xmlrpcpp/cmake
