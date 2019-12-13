@@ -2,9 +2,9 @@
 
 ## 2019/12/08
 
-### Finish transport a Chinese string from `Qt widget` to `Ros` stream then to `Freetype` demo
+Finish transport a Chinese string from `Qt widget` to `Ros` stream then to `Freetype` demo
 
-### Solve the problem that the newest text carry the before one.
+Solve the problem that the newest text carry the before one.
 <br>
 According to the offical doucuments<br>
 ![image] https://github.com/ShieldQiQi/FourAxisManipulator/blob/master/Picture/FreetypeDocument.png
@@ -13,9 +13,9 @@ According to the offical doucuments<br>
 
 ## 2019/12/11
 
-### add RVIZ visualization of the Text
+add RVIZ visualization of the Text
 
 ## 2019/12/13
 
-### Try to Simplify the Text to dashs from outlines first before judge what the strok is.
+Try to Simplify the Text to dashs from outlines first before judge what the strok is.
 
