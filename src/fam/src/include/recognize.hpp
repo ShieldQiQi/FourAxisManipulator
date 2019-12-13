@@ -24,8 +24,7 @@ struct Stroke
 
         int scale;
 };
-/*
- * @Parama defination
+/* @Parama defination
  * The point's 'X' position
  * The point's 'Y' position
  */
@@ -68,7 +67,7 @@ void Recognize::removeRecognizedPoints(unsigned char image[100][1000],LinkQueue<
 
 Stroke Recognize::findPath(unsigned char imageBuffer[100][1000],LinkQueue<Point> pointQueue)
 {
-    Point point;
+    Point point,pointTemp;
     point.x = pointQueue.getFront().x;
     point.y = pointQueue.getFront().y;
     Stroke strokeTemp;
@@ -77,6 +76,7 @@ Stroke Recognize::findPath(unsigned char imageBuffer[100][1000],LinkQueue<Point>
     if(imageBuffer[point.y][point.x+1] == 1 && imageBuffer[point.y][point.x+2] == 1
             && imageBuffer[point.y][point.x+3] == 1 && imageBuffer[point.y][point.x+4] == 1)
     {
+        //find in x Axis
         int n = 5;
         int breakNum = 0;
         for (; breakNum < 0.2*n ; n++)
@@ -88,9 +88,39 @@ Stroke Recognize::findPath(unsigned char imageBuffer[100][1000],LinkQueue<Point>
                 breakNum = 0;
         }
         n = n - breakNum;
+        //find in y Axis
+        int m = 0;
+        breakNum = 0;
+        for (; breakNum < 0.2*m ; m++)
+        {
+            //breakNum防止直线被其它笔画截断
+            if(imageBuffer[point.y+m][point.x+n] != 1)
+                breakNum++;
+            else
+                breakNum = 0;
+        }
+        m = m - breakNum;
+
+
         //n>15则将该笔画归类为 "一横"
         if(n>15)
         {
+            //将识别过的点存入点队列
+            for (int i=1;i<=n;i++) {
+                pointTemp.x = point.x+n;
+                pointTemp.y = point.y;
+                pointQueue.push(pointTemp);
+                pointTemp.y = point.y+m;
+                pointQueue.push(pointTemp);
+            }
+            for (int i=1;i<m;i++) {
+                pointTemp.x = point.x;
+                pointTemp.y = point.y+m;
+                pointQueue.push(pointTemp);
+                pointTemp.x = point.x+n;
+                pointQueue.push(pointTemp);
+            }
+            //输出笔画为"一横"
             strokeTemp.x = point.x;
             strokeTemp.y = point.y;
             strokeTemp.index = 0;
@@ -99,23 +129,27 @@ Stroke Recognize::findPath(unsigned char imageBuffer[100][1000],LinkQueue<Point>
         }else//否则该笔画为垂直型笔画或者斜线型笔画
         {
             //如果包含3个垂直点则认为笔画为直线或者竖弯钩或者竖弯
-            if(imageBuffer[point.y+1][point.x+n] == 1 && imageBuffer[point.y+2][point.x+n] == 1
-                    && imageBuffer[point.y+3][point.x+n] == 1)
+            if(m>=3)
             {
-                int n = 4;
-                int breakNum = 0;
-                for (; breakNum < 0.2*n ; n++)
+                //左侧有点表示该笔画为竖线
+                if(imageBuffer[point.y+m][point.x+n-1] == 1 && imageBuffer[point.y+m][point.x+n-2] == 1)
                 {
-                    //breakNum防止直线被其它笔画截断
-                    if(imageBuffer[point.y+n][point.x+n] != 1)
-                        breakNum++;
-                    else
-                        breakNum = 0;
-                }
-                n = n - breakNum;
-                //左侧或右侧有点表示该笔画为竖线
-                if(imageBuffer[point.y+n][point.x+n+1] == 1 ||imageBuffer[point.y+n][point.x+n-1] == 1 )
-                {
+                    //将识别过的点存入点队列
+                    for (int i=1;i<=n;i++) {
+                        pointTemp.x = point.x+n;
+                        pointTemp.y = point.y;
+                        pointQueue.push(pointTemp);
+                        pointTemp.y = point.y+m;
+                        pointQueue.push(pointTemp);
+                    }
+                    for (int i=1;i<m;i++) {
+                        pointTemp.x = point.x;
+                        pointTemp.y = point.y+m;
+                        pointQueue.push(pointTemp);
+                        pointTemp.x = point.x+n;
+                        pointQueue.push(pointTemp);
+                    }
+                    //输出笔画为"一竖"
                     strokeTemp.x = point.x;
                     strokeTemp.y = point.y;
                     strokeTemp.index = 1;
@@ -123,15 +157,47 @@ Stroke Recognize::findPath(unsigned char imageBuffer[100][1000],LinkQueue<Point>
                     return(strokeTemp);
                 }else//否则为竖弯钩或者竖弯
                 {
-                    if(imageBuffer[point.y+n+1][point.x+n-1] == 1)
+                    if(imageBuffer[point.y+m+1][point.x+n-1] == 1)
                     {
+                        //将识别过的点存入点队列、由于特殊性，遍历与之连通的所有点存入点队列
+                        int start_x1 = point.x;
+                        int start_x2 = point.x+n;
+                        for(int layerNum=1;layerNum>0;)
+                        {
+                            int neighbourNum1 = 0, neighbourNum2 = 0;
+                            for (;neighbourNum1>0 || neighbourNum2>0 ;) {
+                                if(neighbourNum1 > 0 && imageBuffer[point.y+layerNum][start_x1-neighbourNum1]==1){
+                                    neighbourNum1++;
+                                }else {
+                                    neighbourNum1 = -1;
+                                }
+
+                                if(neighbourNum2 > 0 && imageBuffer[point.y+layerNum][start_x2-neighbourNum2]==1){
+                                    neighbourNum2++;
+                                }else {
+                                    neighbourNum2 = -1;
+                                }
+                            }
+                            layerNum++;
+                            if(imageBuffer[point.y+layerNum][start_x1] == 1)
+                            {}else if(imageBuffer[point.y+layerNum][start_x1-1] == 1){
+                                start_x1 = start_x1-1;
+                            }
+                            if(imageBuffer[point.y+layerNum][start_x2] == 1)
+                            {}else if(imageBuffer[point.y+layerNum][start_x2-1] == 1){
+                                start_x2 = start_x2-1;
+                            }
+                        }
+
                         strokeTemp.x = point.x;
                         strokeTemp.y = point.y;
                         strokeTemp.index = 2;
                         strokeTemp.scale = n;
                         return(strokeTemp);
-                    }else if(imageBuffer[point.y+n+1][point.x+n+1] == 1)
+                    }else if(imageBuffer[point.y+m+1][point.x+n+1] == 1)
                     {
+                        //将识别过的点存入点队列、由于特殊性，将与之连通的所有点存入点队列
+
                         strokeTemp.x = point.x;
                         strokeTemp.y = point.y;
                         strokeTemp.index = 3;

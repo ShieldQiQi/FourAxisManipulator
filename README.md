@@ -15,3 +15,7 @@ According to the offical doucuments<br>
 
 ### add RVIZ visualization of the Text
 
+## 2019/12/13
+
+### Try to Simplify the Text to dashs from outlines first before judge what the strok is.
+
