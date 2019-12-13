@@ -6,6 +6,14 @@
 
 #IncludeRegexTransform: 
 
+/home/pi/catkin_qi/src/fam/src/./include/linkqueue.hpp
+iostream
+-
+
+/home/pi/catkin_qi/src/fam/src/./include/recognize.hpp
+linkqueue.hpp
+/home/pi/catkin_qi/src/fam/src/./include/linkqueue.hpp
+
 /home/pi/catkin_qi/src/fam/src/talker.cpp
 ros/ros.h
 -
@@ -45,6 +53,8 @@ cmath
 -
 tf/transform_broadcaster.h
 -
+./include/recognize.hpp
+/home/pi/catkin_qi/src/fam/src/./include/recognize.hpp
 
 /home/pi/catkin_qi/src/serial/include/serial/serial.h
 limits

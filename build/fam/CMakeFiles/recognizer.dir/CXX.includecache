@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/pi/catkin_qi/src/fam/src/./include/recognize.h
+
+/home/pi/catkin_qi/src/fam/src/recognize.cpp
+./include/recognize.h
+/home/pi/catkin_qi/src/fam/src/./include/recognize.h
+

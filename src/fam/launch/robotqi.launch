@@ -1,23 +1,14 @@
 <launch>
   <arg
-    name="model" />
-  <arg
     name="gui"
     default="False" />
-  <param
-    name="robot_description"
-    textfile="$(find model)/urdf/model.urdf" />
   <param
     name="use_gui"
     value="$(arg gui)" />
   <node
-    name="robot_state_publisher"
-    pkg="robot_state_publisher"
-    type="state_publisher" />
-  <node
-    name="joint_pub"
-    pkg="fam"
-    type="joint_pub" />
+    name="qtui"
+    pkg="qtui"
+    type="qtui" />
   <node
     name="talker"
     pkg="fam"

@@ -24,11 +24,13 @@
 #include <visualization_msgs/Marker.h>
 #include <cmath>
 #include <tf/transform_broadcaster.h>
+#include "./include/recognize.hpp"
 
-#define WIDTH   200
-#define HEIGHT  30
+#define WIDTH   1000
+#define HEIGHT  100
 /* origin is the upper left corner */
 unsigned char image[HEIGHT][WIDTH];
+unsigned char imageBuffer[HEIGHT][WIDTH];
 std_msgs::Float64 hipAngle;
 FT_Library    library;
 FT_Face       face;
@@ -41,6 +43,8 @@ wchar_t       *wcharText = L"齐";
 double        angle;
 int           target_height;
 int           n, num_chars;
+
+Recognize	  recognizer;
 
 static uint8_t s_buffer[5];
 serial::Serial ser; //声明串口对象 
@@ -120,8 +124,8 @@ void updatePoints(visualization_msgs::Marker &points)
 	points.id = 0;
 	points.type = visualization_msgs::Marker::POINTS;
 	// POINTS markers use x and y scale for width/height respectively
-	points.scale.x = 0.02;
-	points.scale.y = 0.02;
+	points.scale.x = 0.0008;
+	points.scale.y = 0.0008;
 	// Points are green
 	points.color.g = 1.0f;
 	points.color.b = 0.7f;
@@ -133,12 +137,35 @@ void updatePoints(visualization_msgs::Marker &points)
 		{
 			if(image[j][i] != 0){
 				geometry_msgs::Point p;
-				p.x = 0.08*j;
-				p.y = 0.04*i;
+				p.x = 0.006*j;
+				p.y = 0.002*i;
 				p.z = 0;
 
 				points.points.push_back(p);
 			}
+		}
+	}
+}
+
+void getOutline()
+{ 
+	//舍去buffer边缘的点
+	for (int i = 1; i < WIDTH-1; ++i)
+	{
+		for(int j = 1;j<HEIGHT-1;j++)
+		{
+			if(image[j][i] != 0 && (image[j-1][i] == 0 || image[j+1][i] == 0 || image[j][i-1] == 0 || image[j][i+1] == 0 )){
+				imageBuffer[j][i] = 1;
+			}else{
+				imageBuffer[j][i] = 0;
+			}
+		}
+	}
+	for (int i = 0; i < WIDTH; ++i)
+	{
+		for(int j =0;j<HEIGHT;j++)
+		{	
+			image[j][i] = imageBuffer[j][i];
 		}
 	}
 }
@@ -156,13 +183,14 @@ void readTextString_callback(std_msgs::String textString)
 	num_chars = wcslen(pWstrData);
 	
 	FT_New_Face( library, filename, 0, &face );
-	FT_Set_Char_Size( face, 30 * 64, 10*64, 200, 0 );
+	FT_Set_Char_Size( face, 30 * 64, 10*64, 400, 0 );
 	slot = face->glyph;
 	
 	for ( n = 0; n < num_chars; n++ )
 	{
 		FT_Set_Transform( face, &matrix, &pen );
 		error = FT_Load_Char( face, pWstrData[n], FT_LOAD_RENDER );
+		//error = FT_Render_Glyph( face->glyph, FT_RENDER_MODE_NORMAL ); 
 		if ( error )
 		  continue;
 		draw_bitmap( &slot->bitmap,
@@ -174,10 +202,11 @@ void readTextString_callback(std_msgs::String textString)
 	}
 	show_image();
 	
+	getOutline();
 	updatePoints(points);
 	
 	pen.x = 15 * 64;
-	pen.y = ( target_height - 22 ) * 64;
+	pen.y = ( target_height - 50 ) * 64;
 	FT_Done_Face(face);
 	for(int i = 0;i<WIDTH; i++)
 		for(int j =0;j<HEIGHT;j++)
@@ -277,35 +306,3 @@ int main (int argc, char** argv)
 /*******************************************************************************************************************
  * End Of File
  * ************************************/
-
-
-	//~ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud> ("pcl_output", 50);
-	//~sensor_msgs::PointCloud output;
-	//~output.header.stamp = ros::Time::now();
-	//~output.header.frame_id = "pointcloud";
-	//~output.points.resize(50);
-	//~output.channels.resize(1);
-	//~output.channels[0].name = "intensities";
-	//~output.channels[0].values.resize(50);
-	//geometry_msgs::Point32 points[50];
-	//~for(int i = 0 ;i<50;i++){
-		//~output.points[i].z = 0;
-		//~output.points[i].x = i;
-		//~output.points[i].y = 50-i;
-		//~output.channels[0].values[i] = 100;
-	//~}
-	//~output.points = points;
-	
-	//~ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pcl_output", 50);
-	//~sensor_msgs::PointCloud2 output;
-	//~std::vector<sensor_msgs::PointField>  pointfields;
-	//~output.header.stamp = ros::Time::now();
-	//~output.header.frame_id = "map";//"textFrame";
-	//~output.fields = pointfields;
-	//~output.height = 1;
-	//~output.width = 3356;
-	//~output.data = {12 ,45 ,45 ,45 ,15 ,22 ,14};
-	//~output.is_bigendian = false;
-	//~output.point_step = 16;
-	//~output.row_step = 53696;
-	//~output.is_dense = true;
