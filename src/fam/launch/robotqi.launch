@@ -6,18 +6,18 @@
     name="use_gui"
     value="$(arg gui)" />
   <node
-    name="qtui"
-    pkg="qtui"
-    type="qtui" />
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find fam)/rviz_cfg/text_simulation.rviz"
+    />
   <node
     name="talker"
     pkg="fam"
     type="talker" 
     output="screen"/>
   <node
-    name="rviz"
-    pkg="rviz"
-    type="rviz"
-    args="-d $(find fam)/rviz_cfg/text_simulation.rviz"
-    />
+    name="qtui"
+    pkg="qtui"
+    type="qtui" />
 </launch>

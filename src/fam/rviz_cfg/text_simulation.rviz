@@ -61,7 +61,7 @@ Visualization Manager:
       Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 80; 80; 80
     Default Light: true
     Fixed Frame: textFrame
     Frame Rate: 30
@@ -93,11 +93,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 198.39256286621094
+      Scale: 385.9527893066406
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 0.21255804598331451
-      Y: 2.4587643146514893
+      X: 0.6868712902069092
+      Y: 1.070449709892273
     Saved: ~
 Window Geometry:
   Displays:
@@ -115,5 +115,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1757
-  X: 54
-  Y: -30
+  X: 162
+  Y: 0

@@ -50,6 +50,7 @@ static uint8_t s_buffer[5];
 serial::Serial ser; //声明串口对象 
 
 visualization_msgs::Marker points;
+visualization_msgs::Marker pointsOrigin;
 
 using namespace std;
 
@@ -112,58 +113,69 @@ void write_callback(const std_msgs::Float64MultiArray angleArray)
 
 //---------------------------------------------------
 //更新文字在RVIZ中的显示
-void updatePoints(visualization_msgs::Marker &points)
+void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointsOrigin)
 {
-	points.points.clear();
-	
-	points.header.frame_id  = "/textFrame";
-	points.header.stamp = ros::Time::now();
-	points.ns = "textPoints";
-	points.action = visualization_msgs::Marker::ADD;
-	points.pose.orientation.w = 1.0;
-	points.id = 0;
-	points.type = visualization_msgs::Marker::POINTS;
-	// POINTS markers use x and y scale for width/height respectively
-        points.scale.x = 0.0032;
-        points.scale.y = 0.0032;
-	// Points are green
-	points.color.g = 1.0f;
-	points.color.b = 0.7f;
-	points.color.a = 1.0;
-	
-        recognizer.Analyse(image);
+    points.points.clear();
 
-	for (int i = 0; i < WIDTH; ++i)
-	{
-            for(int j =0;j<HEIGHT;j++)
-            {
-                if(image[j][i] != 0){
-                    switch(image[j][i])
-                    {
-                    //"一横"用白色表示
-                    case 2:
-                        points.color.r = 1.0f;
-                        points.color.g = 1.0f;
-                        points.color.b = 1.0f;
-                        points.color.a = 1.0;
-                        break;
-                    //"一竖"用绿色表示
-                    case 3:
-                        points.color.r = 0.0f;
-                        points.color.g = 1.0f;
-                        points.color.b = 0.0f;
-                        points.color.a = 1.0;
-                        break;
-                    }
-                    geometry_msgs::Point p;
-                    p.x = 0.024*j;
-                    p.y = 0.008*i;
-                    p.z = 0;
+    points.header.frame_id  = "/textFrame";
+    points.header.stamp = ros::Time::now();
+    points.ns = "textPoints";
+    points.action = visualization_msgs::Marker::ADD;
+    points.pose.orientation.w = 1.0;
+    points.id = 0;
+    points.type = visualization_msgs::Marker::POINTS;
+    // POINTS markers use x and y scale for width/height respectively
+    points.scale.x = 0.0032;
+    points.scale.y = 0.0032;
+    // Points are green
+    points.color.g = 1.0f;
+    points.color.a = 1.0;
 
-                    points.points.push_back(p);
-                }
+    pointsOrigin.points.clear();
+
+    pointsOrigin.header.frame_id  = "/textFrame";
+    pointsOrigin.header.stamp = ros::Time::now();
+    pointsOrigin.ns = "textPoints";
+    pointsOrigin.action = visualization_msgs::Marker::ADD;
+    pointsOrigin.pose.orientation.w = 1.0;
+    pointsOrigin.id = 0;
+    pointsOrigin.type = visualization_msgs::Marker::POINTS;
+    // POINTS markers use x and y scale for width/height respectively
+    pointsOrigin.scale.x = 0.0032;
+    pointsOrigin.scale.y = 0.0032;
+    // Points are green
+    pointsOrigin.color.b = 1.0f;
+    pointsOrigin.color.a = 1.0;
+
+    for (int i = 0; i < WIDTH; ++i)
+    {
+        for(int j =0;j<HEIGHT;j++)
+        {
+            if(image[j][i] != 0){
+                geometry_msgs::Point p;
+                p.x = 0.024*j;
+                p.y = 0.008*i;
+                p.z = 0;
+                pointsOrigin.points.push_back(p);
             }
-	}
+        }
+    }
+
+    recognizer.Analyse(image);
+
+    for (int i = 0; i < WIDTH; ++i)
+    {
+        for(int j =0;j<HEIGHT;j++)
+        {
+            if(image[j][i] != 0 && image[j][i] != 1){
+                geometry_msgs::Point p;
+                p.x = 0.024*j;
+                p.y = 0.008*i;
+                p.z = 0;
+                points.points.push_back(p);
+            }
+        }
+    }
 }
 
 void getOutline()
@@ -192,7 +204,7 @@ void getOutline()
 void readTextString_callback(std_msgs::String textString) 
 { 		
 	//std_msgs::String  ---->  std::string   ------> std::wstring -------> const wchar_t*
-        ROS_INFO("I heard %s\n",textString.data);
+        //ROS_INFO("I heard %s\n",textString.data);
 	string testStr(textString.data);
 	wstring wstrData;
 	wstrData = s2ws(testStr);
@@ -219,10 +231,10 @@ void readTextString_callback(std_msgs::String textString)
 		pen.x += slot->advance.x;
 		pen.y += slot->advance.y;
 	}
-	show_image();
+        //show_image();
 	
 	getOutline();
-	updatePoints(points);
+        updatePoints(points,pointsOrigin);
 	
 	pen.x = 15 * 64;
 	pen.y = ( target_height - 50 ) * 64;
@@ -311,7 +323,7 @@ int main (int argc, char** argv)
 		broadcaster.sendTransform(tf::StampedTransform( tf::Transform(tf::Quaternion(0, 0, 0, 1), 
 									tf::Vector3(0.0, 0.0, 0.0)),ros::Time::now(),"map", "textFrame"));
 		marker_pub.publish(points);			
-									
+                marker_pub.publish(pointsOrigin);
 		//loop_rate.sleep();
 		ros::spinOnce();
 

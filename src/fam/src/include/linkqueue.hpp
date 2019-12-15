@@ -111,11 +111,34 @@ T LinkQueue<T>::getRear()
 template <typename T>
 void LinkQueue<T>::QueueTravers()
 {
+    setlocale(LC_CTYPE, "zh_CN.utf8");
+    setlocale(LC_ALL, "");
     Node<T>* pNode=new Node<T>();
     pNode=phead->next;
     while(pNode!=nullptr)
     {
-        std::cout<<pNode->value<<endl;
+        switch(pNode->value.index)
+        {
+        case 0:
+            ROS_INFO("一横");
+            break;
+        case 1:
+            ROS_INFO("一竖");
+            break;
+        case 2:
+            ROS_INFO("左竖弯");
+            break;
+        case 3:
+            ROS_INFO("右竖弯");
+            break;
+        case 4:
+            ROS_INFO("一撇");
+            break;
+        case 5:
+            ROS_INFO("一捺");
+            break;
+        }
+        //std::cout<<pNode->value<<endl;
         pNode=pNode->next;
     }
 }
@@ -143,24 +166,5 @@ void LinkQueue<T>::ClearQueue()
     }
     pend = phead;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif // LINKQUEUE_H
