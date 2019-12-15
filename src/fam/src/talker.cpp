@@ -124,26 +124,45 @@ void updatePoints(visualization_msgs::Marker &points)
 	points.id = 0;
 	points.type = visualization_msgs::Marker::POINTS;
 	// POINTS markers use x and y scale for width/height respectively
-	points.scale.x = 0.0008;
-	points.scale.y = 0.0008;
+        points.scale.x = 0.0032;
+        points.scale.y = 0.0032;
 	// Points are green
 	points.color.g = 1.0f;
 	points.color.b = 0.7f;
 	points.color.a = 1.0;
 	
+        recognizer.Analyse(image);
+
 	for (int i = 0; i < WIDTH; ++i)
 	{
-		for(int j =0;j<HEIGHT;j++)
-		{
-			if(image[j][i] != 0){
-				geometry_msgs::Point p;
-				p.x = 0.006*j;
-				p.y = 0.002*i;
-				p.z = 0;
+            for(int j =0;j<HEIGHT;j++)
+            {
+                if(image[j][i] != 0){
+                    switch(image[j][i])
+                    {
+                    //"一横"用白色表示
+                    case 2:
+                        points.color.r = 1.0f;
+                        points.color.g = 1.0f;
+                        points.color.b = 1.0f;
+                        points.color.a = 1.0;
+                        break;
+                    //"一竖"用绿色表示
+                    case 3:
+                        points.color.r = 0.0f;
+                        points.color.g = 1.0f;
+                        points.color.b = 0.0f;
+                        points.color.a = 1.0;
+                        break;
+                    }
+                    geometry_msgs::Point p;
+                    p.x = 0.024*j;
+                    p.y = 0.008*i;
+                    p.z = 0;
 
-				points.points.push_back(p);
-			}
-		}
+                    points.points.push_back(p);
+                }
+            }
 	}
 }
 
@@ -173,7 +192,7 @@ void getOutline()
 void readTextString_callback(std_msgs::String textString) 
 { 		
 	//std_msgs::String  ---->  std::string   ------> std::wstring -------> const wchar_t*
-	
+        ROS_INFO("I heard %s\n",textString.data);
 	string testStr(textString.data);
 	wstring wstrData;
 	wstrData = s2ws(testStr);
@@ -244,7 +263,8 @@ int main (int argc, char** argv)
 	matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L );
 	matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
 	matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
-
+        pen.x = 15 * 64;
+        pen.y = ( target_height - 50 ) * 64;
 	//------------------------------------------------------------------
 	//Init Serial Port communicating with stm32
 	

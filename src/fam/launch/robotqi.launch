@@ -12,10 +12,12 @@
   <node
     name="talker"
     pkg="fam"
-    type="talker" />
+    type="talker" 
+    output="screen"/>
   <node
     name="rviz"
     pkg="rviz"
     type="rviz"
-    args="-d $(find model)/urdf.rviz" />
+    args="-d $(find fam)/rviz_cfg/text_simulation.rviz"
+    />
 </launch>

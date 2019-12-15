@@ -82,9 +82,9 @@ void QNode::run() {
 		
 		chatter_publisher.publish(angleArray);
 		
-		if(stringBefore.data != this->textString.data){
-			textString_publisher.publish(this->textString);
-			std::cout<<this->textString.data<<std::endl;
+                if(stringBefore.data != this->textString.data){
+                        textString_publisher.publish(this->textString);
+                        std::cout<<this->textString.data<<std::endl;
 		}
 		stringBefore.data = this->textString.data;
 		
@@ -94,7 +94,7 @@ void QNode::run() {
 		log(Info,std::string("I sent: ")+msg.data);
 		ros::spinOnce();
 		loop_rate.sleep();
-		++count;
+                ++count;
 	}
 	//std::cout << "Ros shutdown, proceeding to close the gui." << std::endl;
 	Q_EMIT rosShutdown(); // used to signal the gui for a shutdown (useful to roslaunch)

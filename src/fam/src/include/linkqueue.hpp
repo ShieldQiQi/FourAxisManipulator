@@ -32,9 +32,11 @@ public:
     bool pop();             //出队列
     void push(T t);         //进队列
     T getFront();           //获取队列头元素
+    T getRear();            //获取队列尾元素
     void QueueTravers();    //遍历队列
     void DestoryQueue();    //销毁队列
     void ClearQueue();      //清空队列
+
 private:
     int count;              //队列元素个数
     Node<T>* phead;         //队列头
@@ -99,6 +101,12 @@ T LinkQueue<T>::getFront()
 {
     return phead->next->value;
 }
+//-------------获取队尾元素---------------/
+template <typename T>
+T LinkQueue<T>::getRear()
+{
+    return pend->value;
+}
 //---------------遍历队列---------------/
 template <typename T>
 void LinkQueue<T>::QueueTravers()
@@ -133,6 +141,7 @@ void LinkQueue<T>::ClearQueue()
         phead->next=phead->next->next;
         delete pNode;
     }
+    pend = phead;
 }
 
 
