@@ -140,7 +140,7 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     pointsOrigin.pose.orientation.w = 1.0;
     pointsOrigin.id = 0;
     pointsOrigin.type = visualization_msgs::Marker::POINTS;
-    // POINTS markers use x and y scale for width/height respectively
+    // POINTS markers use x and y scale for width/height respectivelysdqwdqd
     pointsOrigin.scale.x = 0.0032;
     pointsOrigin.scale.y = 0.0032;
     // Points are green
