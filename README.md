@@ -17,5 +17,5 @@ According to the offical doucuments<br>
 
 ## 2019/12/13
 
-### Try to Simplify the Text to dashs from outlines first before judge what the strok is.
+### 简单识别横 竖 左右竖弯 以及撇捺
 
