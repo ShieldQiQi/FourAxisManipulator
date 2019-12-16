@@ -23,5 +23,5 @@ Try to Simplify the Text to dashs from outlines first before judge what the stro
 
 Simplify the Text to dashs from outlines and solid first, then sort the pointqueue according to 
 <br>
-hand-writing habits. But the effects is not obvious, need for more revolution.
+hand-writing habits. But the effects is not obvious, need for more revolution...
 
