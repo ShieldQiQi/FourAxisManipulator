@@ -19,7 +19,7 @@ add RVIZ visualization of the Text
 
 Try to Simplify the Text to dashs from outlines first before judge what the strok is.
 
-## 2019/12/13
+## 2019/12/16
 
 Simplify the Text to dashs from outlines and solid first, then sort the pointqueue according to 
 <br>
