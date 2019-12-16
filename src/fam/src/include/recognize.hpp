@@ -10,29 +10,24 @@
 #include "linkqueue.hpp"
 
 /* @Parama defination
- * The stroke's 'X' position
- * The stroke's 'Y' position
- * show which stroke is in Chinese Text
- * [index]:0横线、1竖线、2左竖弯、3右竖弯
- * the scale show how big the stroke e.g/the "一" have different scale
- */
-struct Stroke
-{
-        int x;
-        int y;
-        int index;
-
-        int scale;
-};
-/* @Parama defination
  * The point's 'X' position
  * The point's 'Y' position
  */
 struct Point
 {
-        int x;
-        int y;
+    int x;
+    int y;
+
+    //在4个方向上定义距离轮廓的长度,100表示无穷大不采用
+    int len_12=100;
+    int len_6=100;
+    int len_3=100;
+    int len_9=100;
+
 };
+
+const int WIDTH = 1000;
+const int HEIGHT = 150;
 
 //-------------------------------------------------------------------------------------
 //Stroke recognizer
@@ -41,198 +36,155 @@ class Recognize
 public:
 	Recognize();
 	~Recognize();
-	
-	//构造笔画队列
-        LinkQueue<Stroke> strokeQueue;
 
         //构造点缓存队列
         LinkQueue<Point> pointQueue;
-	
-        //寻找有效的笔画边缘
-        Stroke findPath(unsigned char imageBuffer[100][1000],LinkQueue<Point> pointQueue);
-        //删除弹入队列之后的笔画对应的点、对其它点进行笔画识别
-        void removeRecognizedPoints(unsigned char image[100][1000],LinkQueue<Point> pointQueue);
 
-	//分析汉字部首，存入队列中
-	void Analyse(unsigned char (&imageBuffer)[100][1000]);
+        LinkQueue<Point> Analyse(unsigned char (&image)[HEIGHT][WIDTH]);
+
+        //判断点是否为轮廓点
+        bool isOutlinePoint(unsigned char imageBuffer[HEIGHT][WIDTH],int i,int j);
+
+        //寻找路径点
+        void findPath(unsigned char imageBuffer[HEIGHT][WIDTH]);
+
+        //删除原有的实心汉字,构造由点构成的新汉字
+        void buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH]);
+
+        //按照汉字笔画,给点队列排序构成路径
+        void sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int j);
 	
 private:
 	
 };
 
-void Recognize::removeRecognizedPoints(unsigned char image[100][1000],LinkQueue<Point> pointQueue)
+bool Recognize::isOutlinePoint(unsigned char imageBuffer[HEIGHT][WIDTH],int i,int j)
 {
-
+    if(imageBuffer[j-1][i] == 0 || imageBuffer[j+1][i] == 0 || imageBuffer[j][i-1] == 0 || imageBuffer[j][i+1] == 0 ){
+        return 1;
+    }else{
+        return 0;
+    }
 }
 
-Stroke Recognize::findPath(unsigned char imageBuffer[100][1000],LinkQueue<Point> pointQueue)
+void Recognize::findPath(unsigned char imageBuffer[HEIGHT][WIDTH])
 {
-    Point point,pointTemp;
-    point.x = pointQueue.getFront().x;
-    point.y = pointQueue.getFront().y;
-    Stroke strokeTemp;
-
-    //judge is there right array, or left array, or left-bottom or right-bottom stroke
-    if(imageBuffer[point.y][point.x+1] == 1 && imageBuffer[point.y][point.x+2] == 1
-            && imageBuffer[point.y][point.x+3] == 1 && imageBuffer[point.y][point.x+4] == 1)
+    Point point;
+    for (int i = 0; i < WIDTH; ++i)
     {
-        //find in x Axis
-        int n = 5;
-        int breakNum = 0;
-        for (; breakNum < 0.2*n ; n++)
+        for(int j =0;j < HEIGHT;j++)
         {
-            //breakNum防止直线被其它笔画截断
-            if(imageBuffer[point.y][point.x+n] != 1)
-                breakNum++;
-            else
-                breakNum = 0;
-        }
-        n = n - breakNum;
-        //find in y Axis
-        int m = 0;
-        breakNum = 0;
-        for (; breakNum < 0.2*m ; m++)
-        {
-            //breakNum防止直线被其它笔画截断
-            if(imageBuffer[point.y+m][point.x+n] != 1)
-                breakNum++;
-            else
-                breakNum = 0;
-        }
-        m = m - breakNum;
+            if(imageBuffer[j][i] == 1 && isOutlinePoint(imageBuffer,i,j) == 0){
+                //该点向4个方向延长直到轮廓点,存下长度
+                int len = 0;
+                for(len = 0;isOutlinePoint(imageBuffer,i,j-len) == 0;len++);
+                point.len_12 = len;
+                for(len = 0;isOutlinePoint(imageBuffer,i,j+len) == 0;len++);
+                point.len_6 = len;
+                for(len = 0;isOutlinePoint(imageBuffer,i-len,j) == 0;len++);
+                point.len_9 = len;
+                for(len = 0;isOutlinePoint(imageBuffer,i+len,j) == 0;len++);
+                point.len_3 = len;
 
-
-        //n>15则将该笔画归类为 "一横"
-        if(n>15)
-        {
-            //将识别过的点存入点队列
-            for (int i=1;i<=n;i++) {
-                pointTemp.x = point.x+n;
-                pointTemp.y = point.y;
-                pointQueue.push(pointTemp);
-                pointTemp.y = point.y+m;
-                pointQueue.push(pointTemp);
-            }
-            for (int i=1;i<m;i++) {
-                pointTemp.x = point.x;
-                pointTemp.y = point.y+m;
-                pointQueue.push(pointTemp);
-                pointTemp.x = point.x+n;
-                pointQueue.push(pointTemp);
-            }
-            //输出笔画为"一横"
-            strokeTemp.x = point.x;
-            strokeTemp.y = point.y;
-            strokeTemp.index = 0;
-            strokeTemp.scale = n;
-            return(strokeTemp);
-        }else//否则该笔画为垂直型笔画或者斜线型笔画
-        {
-            //如果包含3个垂直点则认为笔画为直线或者竖弯钩或者竖弯
-            if(m>=3)
-            {
-                //左侧有点表示该笔画为竖线
-                if(imageBuffer[point.y+m][point.x+n-1] == 1 && imageBuffer[point.y+m][point.x+n-2] == 1)
-                {
-                    //将识别过的点存入点队列
-                    for (int i=1;i<=n;i++) {
-                        pointTemp.x = point.x+n;
-                        pointTemp.y = point.y;
-                        pointQueue.push(pointTemp);
-                        pointTemp.y = point.y+m;
-                        pointQueue.push(pointTemp);
-                    }
-                    for (int i=1;i<m;i++) {
-                        pointTemp.x = point.x;
-                        pointTemp.y = point.y+m;
-                        pointQueue.push(pointTemp);
-                        pointTemp.x = point.x+n;
-                        pointQueue.push(pointTemp);
-                    }
-                    //输出笔画为"一竖"
-                    strokeTemp.x = point.x;
-                    strokeTemp.y = point.y;
-                    strokeTemp.index = 1;
-                    strokeTemp.scale = n;
-                    return(strokeTemp);
-                }else//否则为竖弯钩或者竖弯
-                {
-                    if(imageBuffer[point.y+m+1][point.x+n-1] == 1)
+                if(point.len_3 -point.len_9<=1 && point.len_3 -point.len_9 >=0){
+                    if(point.len_6 -point.len_12<=1 && point.len_6 -point.len_12>=0)
                     {
-                        //将识别过的点存入点队列、由于特殊性，遍历与之连通的所有点存入点队列
-                        int start_x1 = point.x;
-                        int start_x2 = point.x+n;
-                        for(int layerNum=1;layerNum>0;)
-                        {
-                            int neighbourNum1 = 0, neighbourNum2 = 0;
-                            for (;neighbourNum1>0 || neighbourNum2>0 ;) {
-                                if(neighbourNum1 > 0 && imageBuffer[point.y+layerNum][start_x1-neighbourNum1]==1){
-                                    neighbourNum1++;
-                                }else {
-                                    neighbourNum1 = -1;
-                                }
-
-                                if(neighbourNum2 > 0 && imageBuffer[point.y+layerNum][start_x2-neighbourNum2]==1){
-                                    neighbourNum2++;
-                                }else {
-                                    neighbourNum2 = -1;
-                                }
-                            }
-                            layerNum++;
-                            if(imageBuffer[point.y+layerNum][start_x1] == 1)
-                            {}else if(imageBuffer[point.y+layerNum][start_x1-1] == 1){
-                                start_x1 = start_x1-1;
-                            }
-                            if(imageBuffer[point.y+layerNum][start_x2] == 1)
-                            {}else if(imageBuffer[point.y+layerNum][start_x2-1] == 1){
-                                start_x2 = start_x2-1;
-                            }
-                        }
-
-                        strokeTemp.x = point.x;
-                        strokeTemp.y = point.y;
-                        strokeTemp.index = 2;
-                        strokeTemp.scale = n;
-                        return(strokeTemp);
-                    }else if(imageBuffer[point.y+m+1][point.x+n+1] == 1)
+                        point.x = i;
+                        point.y = j;
+                        pointQueue.push(point);
+                    }else if(point.len_3<point.len_6 && point.len_3<point.len_12)
                     {
-                        //将识别过的点存入点队列、由于特殊性，将与之连通的所有点存入点队列
-
-                        strokeTemp.x = point.x;
-                        strokeTemp.y = point.y;
-                        strokeTemp.index = 3;
-                        strokeTemp.scale = n;
-                        return(strokeTemp);
+                        point.x = i;
+                        point.y = j;
+                        pointQueue.push(point);
                     }
+                }else if (point.len_6 -point.len_12<=1 && point.len_6 -point.len_12>=0 && point.len_6<point.len_3 && point.len_6<point.len_9) {
+                    point.x = i;
+                    point.y = j;
+                    pointQueue.push(point);
                 }
             }
         }
     }
 }
 
-void Recognize::Analyse(unsigned char (&image)[100][1000])
+
+void Recognize::buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH])
+{
+    while (!pointQueue.isEmpty()) {
+        image[pointQueue.getFront().y][pointQueue.getFront().x] = 2;
+        pointQueue.pop();
+    }
+    pointQueue.ClearQueue();
+}
+
+void Recognize::sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int j)
 {
     Point point;
-
-    for ( int j = 0; j < 100; j++ ){
-        for ( int i = 0; i < 1000; i++ ){
-            if(image[j][i] == 1 && pointQueue.isEmpty()){
-                //将笔画中的第一个点压入队列、构成一个笔画后存入strokeQueue,开始下一循环
-                point.x = i;
+    if(image[j][i] == 2){
+        point.x = i;
+        point.y = j;
+        pointQueue.push(point);
+        //按照汉字书写习惯,从当前点的下半平面(不包括X轴反方向)寻找相邻点
+        //优先级:右方>左下方>下方>右下方
+        if(image[j][i+1] == 2){
+            int n=1;
+            for (;image[j][i+n] == 2;n++) {
+                point.x = i+n;
                 point.y = j;
                 pointQueue.push(point);
-                findPath(image,pointQueue);
-                removeRecognizedPoints(image,pointQueue);
-            }else if(imageBuffer[j][i] == 1 ){
-
+                image[j][i+n] = 0;
             }
+            sortPointQueue(image,i+n-1,j);
+        }else if (image[j+1][i-1] == 2) {
+            int n=1,m=1;
+            for (;image[j+m][i-n] == 2;n++,m++) {
+                point.x = i-n;
+                point.y = j+m;
+                pointQueue.push(point);
+                image[j+m][i-n] = 0;
+            }
+            sortPointQueue(image,i-n+1,j+m-1);
+        }else if (image[j+1][i] == 2) {
+            int m=1;
+            for (;image[j+m][i] == 2;m++) {
+                point.x = i;
+                point.y = j+m;
+                pointQueue.push(point);
+                image[j+m][i] = 0;
+            }
+            sortPointQueue(image,i,j+m-1);
+        }else if (image[j+1][i+1] == 2) {
+            int n=1,m=1;
+            for (;image[j+m][i+n] == 2;n++,m++) {
+                point.x = i+n;
+                point.y = j+m;
+                pointQueue.push(point);
+                image[j+m][i+n] = 0;
+            }
+            sortPointQueue(image,i+n-1,j+m-1);
         }
     }
 }
 
+LinkQueue<Point> Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
+{
+    findPath(image);
+//    buildNewImageBuffer(image);
+//    for (int i = 0; i < WIDTH; ++i)
+//    {
+//        for(int j =0;j < HEIGHT;j++)
+//        {
+//            sortPointQueue(image,i,j);
+//        }
+//    }
+
+    return pointQueue;
+}
+
 Recognize::Recognize()
 {
-	
+
 }
 
 Recognize::~Recognize()

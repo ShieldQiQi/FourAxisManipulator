@@ -32,14 +32,31 @@ public:
     bool pop();             //出队列
     void push(T t);         //进队列
     T getFront();           //获取队列头元素
+    T getRear();            //获取队列尾元素
     void QueueTravers();    //遍历队列
     void DestoryQueue();    //销毁队列
     void ClearQueue();      //清空队列
+
+    void operator=(LinkQueue<T> t);
+
 private:
     int count;              //队列元素个数
     Node<T>* phead;         //队列头
     Node<T>* pend;          //队列尾
 };
+//-----------------重载 =------------------/
+template <typename T>
+void LinkQueue<T>::operator=(LinkQueue<T> t)
+{
+    Node<T>* pNode=new Node<T>();
+    pNode=t.phead->next;
+
+    while(pNode!=nullptr)
+    {
+        this->push(pNode->value);
+        pNode=pNode->next;
+    }
+}
 
 //----------------构造函数-----------------/
 template <typename T>
@@ -99,15 +116,44 @@ T LinkQueue<T>::getFront()
 {
     return phead->next->value;
 }
+//-------------获取队尾元素---------------/
+template <typename T>
+T LinkQueue<T>::getRear()
+{
+    return pend->value;
+}
 //---------------遍历队列---------------/
 template <typename T>
 void LinkQueue<T>::QueueTravers()
 {
+    setlocale(LC_CTYPE, "zh_CN.utf8");
+    setlocale(LC_ALL, "");
     Node<T>* pNode=new Node<T>();
     pNode=phead->next;
     while(pNode!=nullptr)
     {
-        std::cout<<pNode->value<<endl;
+        switch(pNode->value.index)
+        {
+        case 0:
+            ROS_INFO("一横");
+            break;
+        case 1:
+            ROS_INFO("一竖");
+            break;
+        case 2:
+            ROS_INFO("左竖弯");
+            break;
+        case 3:
+            ROS_INFO("右竖弯");
+            break;
+        case 4:
+            ROS_INFO("一撇");
+            break;
+        case 5:
+            ROS_INFO("一捺");
+            break;
+        }
+        //std::cout<<pNode->value<<endl;
         pNode=pNode->next;
     }
 }
@@ -133,25 +179,7 @@ void LinkQueue<T>::ClearQueue()
         phead->next=phead->next->next;
         delete pNode;
     }
+    pend = phead;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif // LINKQUEUE_H

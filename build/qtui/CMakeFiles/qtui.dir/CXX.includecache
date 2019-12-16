@@ -28,15 +28,29 @@ std_msgs/Float64MultiArray.h
 std_msgs/String.h
 -
 
-/home/pi/catkin_qi/src/qtui/src/main_window.cpp
+/home/pi/catkin_qi/src/qtui/src/main.cpp
 QtGui
 -
-QMessageBox
--
-iostream
+QApplication
 -
 ../include/qtui/main_window.hpp
 /home/pi/catkin_qi/src/qtui/include/qtui/main_window.hpp
+
+/home/pi/catkin_qi/src/qtui/src/qnode.cpp
+ros/ros.h
+-
+ros/network.h
+-
+string
+-
+std_msgs/String.h
+-
+std_msgs/Float64MultiArray.h
+-
+sstream
+-
+../include/qtui/qnode.hpp
+/home/pi/catkin_qi/src/qtui/include/qtui/qnode.hpp
 
 /opt/ros/kinetic/include/ros/advertise_options.h
 ros/forwards.h
@@ -265,6 +279,12 @@ boost/type_traits/remove_reference.hpp
 -
 
 /opt/ros/kinetic/include/ros/names.h
+forwards.h
+/opt/ros/kinetic/include/ros/forwards.h
+common.h
+/opt/ros/kinetic/include/ros/common.h
+
+/opt/ros/kinetic/include/ros/network.h
 forwards.h
 /opt/ros/kinetic/include/ros/forwards.h
 common.h
@@ -2349,10 +2369,6 @@ qmenu.h
 /usr/include/qt4/QtGui/QMenuBar
 qmenubar.h
 /usr/include/qt4/QtGui/qmenubar.h
-
-/usr/include/qt4/QtGui/QMessageBox
-qmessagebox.h
-/usr/include/qt4/QtGui/qmessagebox.h
 
 /usr/include/qt4/QtGui/QPalette
 qpalette.h
