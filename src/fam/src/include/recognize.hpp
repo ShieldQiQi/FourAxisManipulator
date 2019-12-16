@@ -42,6 +42,8 @@ public:
 
         LinkQueue<Point> Analyse(unsigned char (&image)[HEIGHT][WIDTH]);
 
+        unsigned char imageTemp[HEIGHT][WIDTH];
+
         //判断点是否为轮廓点
         bool isOutlinePoint(unsigned char imageBuffer[HEIGHT][WIDTH],int i,int j);
 
@@ -52,7 +54,7 @@ public:
         void buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH]);
 
         //按照汉字笔画,给点队列排序构成路径
-        void sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int j);
+        void sortPointQueue(int i, int j);
 	
 private:
 	
@@ -121,51 +123,58 @@ void Recognize::buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH])
     pointQueue.ClearQueue();
 }
 
-void Recognize::sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int j)
+void Recognize::sortPointQueue(int i, int j)
 {
     Point point;
-    if(image[j][i] == 2){
+    if(imageTemp[j][i] == 2){
         point.x = i;
         point.y = j;
         pointQueue.push(point);
         //按照汉字书写习惯,从当前点的下半平面(不包括X轴反方向)寻找相邻点
         //优先级:右方>左下方>下方>右下方
-        if(image[j][i+1] == 2){
+        if(imageTemp[j][i+1] == 2){
             int n=1;
-            for (;image[j][i+n] == 2;n++) {
+            for (;imageTemp[j][i+n] == 2;n++) {
                 point.x = i+n;
                 point.y = j;
                 pointQueue.push(point);
-                image[j][i+n] = 3;
+                imageTemp[j][i+n] = 3;
             }
-            sortPointQueue(image,i+n-1,j);
-        }else if (image[j+1][i-1] == 2) {
+            imageTemp[j][i+n-1] = 2;
+            sortPointQueue(i+n-1,j);
+        }else if (imageTemp[j+1][i-1] == 2) {
             int n=1,m=1;
-            for (;image[j+m][i-n] == 2;n++,m++) {
+            for (;imageTemp[j+m][i-n] == 2;n++,m++) {
                 point.x = i-n;
                 point.y = j+m;
                 pointQueue.push(point);
-                image[j+m][i-n] = 3;
+                imageTemp[j+m][i-n] = 3;
+                ROS_INFO("left-behind");
             }
-            sortPointQueue(image,i-n+1,j+m-1);
-        }else if (image[j+1][i] == 2) {
+            imageTemp[j+m-1][i-n+1] = 2;
+            ROS_INFO("n = %d m = %d",n,m);
+            sortPointQueue(i-n+1,j+m-1);
+        }else if (imageTemp[j+1][i] == 2) {
             int m=1;
-            for (;image[j+m][i] == 2;m++) {
+            for (;imageTemp[j+m][i] == 2;m++) {
                 point.x = i;
                 point.y = j+m;
                 pointQueue.push(point);
-                image[j+m][i] = 3;
+                imageTemp[j+m][i] = 3;
+                ROS_INFO("m = %d",m);
             }
-            sortPointQueue(image,i,j+m-1);
-        }else if (image[j+1][i+1] == 2) {
+            imageTemp[j+m-1][i] = 2;
+            sortPointQueue(i,j+m-1);
+        }else if (imageTemp[j+1][i+1] == 2) {
             int n=1,m=1;
-            for (;image[j+m][i+n] == 2;n++,m++) {
+            for (;imageTemp[j+m][i+n] == 2;n++,m++) {
                 point.x = i+n;
                 point.y = j+m;
                 pointQueue.push(point);
-                image[j+m][i+n] = 3;
+                imageTemp[j+m][i+n] = 3;
             }
-            sortPointQueue(image,i+n-1,j+m-1);
+            imageTemp[j+m-1][i+n-1] = 2;
+            sortPointQueue(i+n-1,j+m-1);
         }
     }
 }
@@ -174,11 +183,20 @@ LinkQueue<Point> Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
 {
     findPath(image);
     buildNewImageBuffer(image);
-    for (int i = 0; i < WIDTH; ++i)
+    for (int j =0;j < HEIGHT;j++)
     {
-        for(int j =0;j < HEIGHT;j++)
+        for(int i = 0; i < WIDTH; i++)
         {
-            sortPointQueue(image,i,j);
+            imageTemp[j][i] = image[j][i];
+            image[j][i] = image[j][i]==2?3:0;
+        }
+    }
+
+    for (int j =0;j < HEIGHT;j++)
+    {
+        for(int i = 0; i < WIDTH; i++)
+        {
+            sortPointQueue(i,j);
         }
     }
 

@@ -19,3 +19,9 @@ add RVIZ visualization of the Text
 
 Try to Simplify the Text to dashs from outlines first before judge what the strok is.
 
+## 2019/12/13
+
+Simplify the Text to dashs from outlines and solid first, then sort the pointqueue according to 
+<br>
+hand-writing habits. But the effects is not obvious, need for more revolution.
+
