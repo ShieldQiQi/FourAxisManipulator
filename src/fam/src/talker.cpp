@@ -52,6 +52,7 @@ serial::Serial ser; //声明串口对象
 
 visualization_msgs::Marker points;
 visualization_msgs::Marker pointsOrigin;
+geometry_msgs::Point p;
 
 using namespace std;
 
@@ -147,7 +148,6 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     pointsOrigin.color.b = 1.0f;
     pointsOrigin.color.a = 1.0;
 
-    geometry_msgs::Point p;
 //    for (int i = 0; i < WIDTH; ++i)
 //    {
 //        for(int j =0;j<HEIGHT;j++)
@@ -161,22 +161,14 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
 //        }
 //    }
     travelQueue = recognizer.Analyse(image);
-
-    while (!travelQueue.isEmpty()) {
-        p.x = 0.012*travelQueue.getFront().x;
-        p.y = 0.012*travelQueue.getFront().y;
-        p.z = 0;
-        pointsOrigin.points.push_back(p);
-        travelQueue.pop();
-    }
-    travelQueue.ClearQueue();
+    recognizer.pointQueue.ClearQueue();
 
     for (int i = 0; i < WIDTH; ++i)
     {
         for(int j =0;j<HEIGHT;j++)
         {
-            if(image[j][i] == 2){
-                p.x = 0.012*(j-130);
+            if(image[j][i] == 3){
+                p.x = 0.012*(j-0);
                 p.y = 0.012*i;
                 p.z = 0;
                 points.points.push_back(p);
@@ -265,6 +257,19 @@ void readTextString_callback(std_msgs::String textString)
                         image[j][i] = 0;
 }
 
+void timerCallback(const ros::TimerEvent& e)
+{
+    if (!travelQueue.isEmpty()) {
+        p.x = 0.012*travelQueue.getFront().y;
+        p.y = 0.012*travelQueue.getFront().x;
+        p.z = 0;
+        pointsOrigin.points.push_back(p);
+        travelQueue.pop();
+    }else {
+        travelQueue.ClearQueue();
+    }
+}
+
 //---------------------------------------------------------------------------------------------
 
 int main (int argc, char** argv)
@@ -283,6 +288,8 @@ int main (int argc, char** argv)
         ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
         //添加RVIZ默认坐标系和Maker坐标系textFrame的坐标系转换关系
         tf::TransformBroadcaster broadcaster;
+
+        ros::Timer timer = nh.createTimer(ros::Duration(0.2), timerCallback);
 
         //------------------------------------------------------------------
         //Init the FreeType

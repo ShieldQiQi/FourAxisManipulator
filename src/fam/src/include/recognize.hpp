@@ -111,9 +111,12 @@ void Recognize::findPath(unsigned char imageBuffer[HEIGHT][WIDTH])
 
 void Recognize::buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH])
 {
-    while (!pointQueue.isEmpty()) {
-        image[pointQueue.getFront().y][pointQueue.getFront().x] = 2;
-        pointQueue.pop();
+    Node<Point>* pNode=new Node<Point>();
+    pNode=pointQueue.phead->next;
+    while(pNode!=nullptr)
+    {
+        image[pNode->value.y][pNode->value.x] = 2;
+        pNode=pNode->next;
     }
     pointQueue.ClearQueue();
 }
@@ -133,7 +136,7 @@ void Recognize::sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int 
                 point.x = i+n;
                 point.y = j;
                 pointQueue.push(point);
-                image[j][i+n] = 0;
+                image[j][i+n] = 3;
             }
             sortPointQueue(image,i+n-1,j);
         }else if (image[j+1][i-1] == 2) {
@@ -142,7 +145,7 @@ void Recognize::sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int 
                 point.x = i-n;
                 point.y = j+m;
                 pointQueue.push(point);
-                image[j+m][i-n] = 0;
+                image[j+m][i-n] = 3;
             }
             sortPointQueue(image,i-n+1,j+m-1);
         }else if (image[j+1][i] == 2) {
@@ -151,7 +154,7 @@ void Recognize::sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int 
                 point.x = i;
                 point.y = j+m;
                 pointQueue.push(point);
-                image[j+m][i] = 0;
+                image[j+m][i] = 3;
             }
             sortPointQueue(image,i,j+m-1);
         }else if (image[j+1][i+1] == 2) {
@@ -160,7 +163,7 @@ void Recognize::sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int 
                 point.x = i+n;
                 point.y = j+m;
                 pointQueue.push(point);
-                image[j+m][i+n] = 0;
+                image[j+m][i+n] = 3;
             }
             sortPointQueue(image,i+n-1,j+m-1);
         }
@@ -170,14 +173,14 @@ void Recognize::sortPointQueue(unsigned char (&image)[HEIGHT][WIDTH],int i, int 
 LinkQueue<Point> Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
 {
     findPath(image);
-//    buildNewImageBuffer(image);
-//    for (int i = 0; i < WIDTH; ++i)
-//    {
-//        for(int j =0;j < HEIGHT;j++)
-//        {
-//            sortPointQueue(image,i,j);
-//        }
-//    }
+    buildNewImageBuffer(image);
+    for (int i = 0; i < WIDTH; ++i)
+    {
+        for(int j =0;j < HEIGHT;j++)
+        {
+            sortPointQueue(image,i,j);
+        }
+    }
 
     return pointQueue;
 }

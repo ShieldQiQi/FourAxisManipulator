@@ -39,7 +39,6 @@ public:
 
     void operator=(LinkQueue<T> t);
 
-private:
     int count;              //队列元素个数
     Node<T>* phead;         //队列头
     Node<T>* pend;          //队列尾
