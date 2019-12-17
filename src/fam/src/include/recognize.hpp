@@ -123,6 +123,7 @@ void Recognize::buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH])
     pointQueue.ClearQueue();
 }
 
+//迭代排序
 void Recognize::sortPointQueue(int i, int j)
 {
     Point point;
@@ -132,46 +133,82 @@ void Recognize::sortPointQueue(int i, int j)
         pointQueue.push(point);
         //按照汉字书写习惯,从当前点的下半平面(不包括X轴反方向)寻找相邻点
         //优先级:右方>左下方>下方>右下方
-        if(imageTemp[j][i+1] == 2){
+
+        //使用插补,解决笔画中断问题, 在优先联接当前方向的前提下使用贪心算法
+
+        if(imageTemp[j][i+1] == 2){         //右方
             int n=1;
-            for (;imageTemp[j][i+n] == 2;n++) {
+            int breakFlag = 0;
+            for (;breakFlag == 0;n++){
                 point.x = i+n;
                 point.y = j;
                 pointQueue.push(point);
                 imageTemp[j][i+n] = 3;
+                if(imageTemp[j][i+n+1] != 2 && imageTemp[j][i+n+2] != 2 && imageTemp[j][i+n+3] != 2 && imageTemp[j][i+n+4] != 2 &&
+                        imageTemp[j][i+n+5] != 2 && imageTemp[j][i+n+6] != 2 && imageTemp[j][i+n+7] != 2 && imageTemp[j][i+n+8] != 2 &&
+                        imageTemp[j][i+n+9] != 2 && imageTemp[j][i+n+10] != 2 && imageTemp[j][i+n+11] != 2 && imageTemp[j][i+n+12] != 2){
+                    breakFlag = 1;
+                }
             }
             imageTemp[j][i+n-1] = 2;
             sortPointQueue(i+n-1,j);
-        }else if (imageTemp[j+1][i-1] == 2) {
+        }else if (imageTemp[j+1][i-1] == 2) {        //左下
             int n=1,m=1;
-            for (;imageTemp[j+m][i-n] == 2;n++,m++) {
+            int breakFlag = 0;
+            for (;breakFlag == 0;n++,m++) {
                 point.x = i-n;
                 point.y = j+m;
                 pointQueue.push(point);
                 imageTemp[j+m][i-n] = 3;
-                ROS_INFO("left-behind");
+                breakFlag = 1;
+                if(imageTemp[j+m+1][i-n] != 2)
+                    for (int x=1;x<20 && breakFlag == 1;x++) {
+                        for (int y=1;y<20 && breakFlag == 1;y++) {
+                            if(imageTemp[j+m+y][i-n-x] ==2){
+                                breakFlag = 0;
+                                m = m+y-1;
+                                n = n+x-1;
+                            }
+                        }
+                    }
             }
             imageTemp[j+m-1][i-n+1] = 2;
-            ROS_INFO("n = %d m = %d",n,m);
             sortPointQueue(i-n+1,j+m-1);
-        }else if (imageTemp[j+1][i] == 2) {
+        }else if (imageTemp[j+1][i] == 2) {         //下方
             int m=1;
-            for (;imageTemp[j+m][i] == 2;m++) {
+            int breakFlag = 0;
+            for (;breakFlag == 0;m++) {
                 point.x = i;
                 point.y = j+m;
                 pointQueue.push(point);
                 imageTemp[j+m][i] = 3;
-                ROS_INFO("m = %d",m);
+                if(imageTemp[j+m+1][i] != 2 && imageTemp[j+m+2][i] != 2 && imageTemp[j+m+3][i] != 2 && imageTemp[j+m+4][i] != 2 &&
+                        imageTemp[j+m+5][i] != 2 && imageTemp[j+m+6][i] != 2 && imageTemp[j+m+7][i] != 2 && imageTemp[j+m+8][i] != 2 &&
+                        imageTemp[j+m+9][i] != 2 && imageTemp[j+m+10][i] != 2 && imageTemp[j+m+11][i] != 2 && imageTemp[j+m+12][i] != 2){
+                    breakFlag = 1;
+                }
             }
             imageTemp[j+m-1][i] = 2;
             sortPointQueue(i,j+m-1);
-        }else if (imageTemp[j+1][i+1] == 2) {
+        }else if (imageTemp[j+1][i+1] == 2) {       //右下
             int n=1,m=1;
-            for (;imageTemp[j+m][i+n] == 2;n++,m++) {
+            int breakFlag = 0;
+            for (;breakFlag == 0;n++,m++) {
                 point.x = i+n;
                 point.y = j+m;
                 pointQueue.push(point);
                 imageTemp[j+m][i+n] = 3;
+                breakFlag = 1;
+                if(imageTemp[j+m+1][i+n] != 2)
+                    for (int x=1;x<20 && breakFlag == 1;x++) {
+                        for (int y=1;y<20 && breakFlag == 1;y++) {
+                            if(imageTemp[j+m+y][i+n+x] ==2){
+                                breakFlag = 0;
+                                m = m+y-1;
+                                n = n+x-1;
+                            }
+                        }
+                    }
             }
             imageTemp[j+m-1][i+n-1] = 2;
             sortPointQueue(i+n-1,j+m-1);

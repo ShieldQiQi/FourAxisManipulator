@@ -118,6 +118,8 @@ void write_callback(const std_msgs::Float64MultiArray angleArray)
 void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointsOrigin)
 {
     points.points.clear();
+    travelQueue.ClearQueue();
+    pointsOrigin.points.clear();
 
     points.header.frame_id  = "/textFrame";
     points.header.stamp = ros::Time::now();
@@ -148,18 +150,6 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     pointsOrigin.color.b = 1.0f;
     pointsOrigin.color.a = 1.0;
 
-//    for (int i = 0; i < WIDTH; ++i)
-//    {
-//        for(int j =0;j<HEIGHT;j++)
-//        {
-//            if(image[j][i] == 1){
-//                p.x = 0.012*j;
-//                p.y = 0.012*i;
-//                p.z = 0;
-//                pointsOrigin.points.push_back(p);
-//            }
-//        }
-//    }
     travelQueue = recognizer.Analyse(image);
     recognizer.pointQueue.ClearQueue();
 
