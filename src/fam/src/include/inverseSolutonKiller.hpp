@@ -4,20 +4,19 @@
  * Created Time:2019/12/18
  * *****************************/
 
-#ifndef RECOGNIZE_H
-#define RECOGNIZE_H
+#ifndef SOLUTION_H
+#define SOLUTION_H
 
 #include <cmath>
 
-class   inverseSolutionKiller
+class inverseSolutionKiller
 {
 public:
 
-    inverseSolutionKiller();
     inverseSolutionKiller(double a_1=0.016,double a_2=0.103,double a_3=0.097,double h_1=0.18,double h_2=0.09,double x_1=0.06);
     ~inverseSolutionKiller();
 
-    float angleArray[4];
+    float angleArray[6];
 
     bool getThetaArray(double x,double y);
 
@@ -39,16 +38,22 @@ bool inverseSolutionKiller::getThetaArray(double x,double y)
 
     double q = x/cos(angleArray[0]) - a1 - x1;
 
-    angleArray[2] = acos((0.09*0.09+q*q-a2*a2-a3*a3)/(2*a2*a3));
+    if(x > a3+x1)
+        angleArray[2] = -acos((0.09*0.09+q*q-a2*a2-a3*a3)/(2*a2*a3));
+    else {
+        angleArray[2] = acos((0.09*0.09+q*q-a2*a2-a3*a3)/(2*a2*a3));
+    }
 
     double s2 = (-0.09-q*a3*sin(angleArray[2])/(a3*cos(angleArray[2])+a2))/
             (a3*cos(angleArray[2])+a2+a3*sin(angleArray[2])*(a3*sin(angleArray[2]))/(a3*cos(angleArray[2])+a2));
     double c2 = (-0.09+q*(a3*cos(angleArray[2])+a2)/a3/sin(angleArray[2]))/
-            (a3*sin(angleArray[2])+(a3*cos(angleArray[2])+a2)*(a3*cos(angleArray[2])+a2)/(a3*sin(angleArray[2])))
+            (a3*sin(angleArray[2])+(a3*cos(angleArray[2])+a2)*(a3*cos(angleArray[2])+a2)/(a3*sin(angleArray[2])));
 
     angleArray[1] = atan(s2/c2);
 
-    angleArray[3] = 2*M_PI - (angleArray[1]+angleArray[2]);
+    angleArray[3] = - (angleArray[1]+angleArray[2]);
+
+    angleArray[4] = angleArray[5] = 0;
 
     return 1;
 }
@@ -68,4 +73,4 @@ inverseSolutionKiller::~inverseSolutionKiller()
 
 }
 
-#endif /*RECOGNIZE_H*/
+#endif /*SOLUTION_H*/

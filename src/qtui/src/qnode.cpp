@@ -80,14 +80,18 @@ void QNode::run() {
 		std_msgs::String msg;
 		std::stringstream ss;
 		
-		chatter_publisher.publish(angleArray);
+                if(workMode)
+                    chatter_publisher.publish(angleArray);
 		
 		if(stringBefore.data != this->textString.data){
+                    if(!workMode){
 			textString_publisher.publish(this->textString);
 			std::cout<<this->textString.data<<std::endl;
-		}
-		stringBefore.data = this->textString.data;
-		
+                    }
+                }
+                if(!workMode)
+                    stringBefore.data = this->textString.data;
+
 		ss << angleArray.data.at(0) << " " << angleArray.data.at(1) << " " << angleArray.data.at(2) 
 			<< " " << angleArray.data.at(3) << " " << angleArray.data.at(4) << " " << angleArray.data.at(5);
 		msg.data = ss.str();

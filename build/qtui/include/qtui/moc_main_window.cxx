@@ -22,7 +22,7 @@ static const uint qt_meta_data_qtui__MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
+       9,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -37,6 +37,8 @@ static const uint qt_meta_data_qtui__MainWindow[] = {
      147,  193,   44,   44, 0x0a,
      199,   44,   44,   44, 0x0a,
      230,   44,   44,   44, 0x0a,
+     264,   44,   44,   44, 0x0a,
+     298,   44,   44,   44, 0x0a,
 
        0        // eod
 };
@@ -48,6 +50,8 @@ static const char qt_meta_stringdata_qtui__MainWindow[] = {
     "on_button_manualActute_clicked()\0"
     "on_checkbox_use_environment_stateChanged(int)\0"
     "state\0on_button_writeStart_clicked()\0"
+    "on_button_radioButton_1_clicked()\0"
+    "on_button_radioButton_2_clicked()\0"
     "updateLoggingView()\0"
 };
 
@@ -63,7 +67,9 @@ void qtui::MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
         case 3: _t->on_button_manualActute_clicked(); break;
         case 4: _t->on_checkbox_use_environment_stateChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 5: _t->on_button_writeStart_clicked(); break;
-        case 6: _t->updateLoggingView(); break;
+        case 6: _t->on_button_radioButton_1_clicked(); break;
+        case 7: _t->on_button_radioButton_2_clicked(); break;
+        case 8: _t->updateLoggingView(); break;
         default: ;
         }
     }
@@ -101,9 +107,9 @@ int qtui::MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 9;
     }
     return _id;
 }

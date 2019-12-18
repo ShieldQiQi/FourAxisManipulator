@@ -28,6 +28,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
 #include <QtGui/QPushButton>
+#include <QtGui/QRadioButton>
 #include <QtGui/QSpacerItem>
 #include <QtGui/QStatusBar>
 #include <QtGui/QTabWidget>
@@ -66,6 +67,9 @@ public:
     QLabel *label_10;
     QLabel *label_11;
     QPushButton *manualActute;
+    QRadioButton *radioButton_1;
+    QRadioButton *radioButton_2;
+    QFrame *line_2;
     QTabWidget *tab_manager;
     QWidget *tab_status;
     QVBoxLayout *verticalLayout_2;
@@ -129,13 +133,13 @@ public:
         frame_2->setFrameShadow(QFrame::Raised);
         textInput = new QTextEdit(frame_2);
         textInput->setObjectName(QString::fromUtf8("textInput"));
-        textInput->setGeometry(QRect(20, 300, 241, 181));
+        textInput->setGeometry(QRect(20, 330, 241, 151));
         label_4 = new QLabel(frame_2);
         label_4->setObjectName(QString::fromUtf8("label_4"));
-        label_4->setGeometry(QRect(20, 261, 221, 31));
+        label_4->setGeometry(QRect(20, 300, 221, 31));
         line = new QFrame(frame_2);
         line->setObjectName(QString::fromUtf8("line"));
-        line->setGeometry(QRect(0, 250, 281, 16));
+        line->setGeometry(QRect(0, 230, 281, 16));
         line->setFrameShape(QFrame::HLine);
         line->setFrameShadow(QFrame::Sunken);
         writeStart = new QPushButton(frame_2);
@@ -183,6 +187,17 @@ public:
         manualActute = new QPushButton(frame_2);
         manualActute->setObjectName(QString::fromUtf8("manualActute"));
         manualActute->setGeometry(QRect(190, 190, 81, 31));
+        radioButton_1 = new QRadioButton(frame_2);
+        radioButton_1->setObjectName(QString::fromUtf8("radioButton_1"));
+        radioButton_1->setGeometry(QRect(150, 250, 119, 27));
+        radioButton_2 = new QRadioButton(frame_2);
+        radioButton_2->setObjectName(QString::fromUtf8("radioButton_2"));
+        radioButton_2->setGeometry(QRect(20, 250, 119, 27));
+        line_2 = new QFrame(frame_2);
+        line_2->setObjectName(QString::fromUtf8("line_2"));
+        line_2->setGeometry(QRect(0, 280, 281, 16));
+        line_2->setFrameShape(QFrame::HLine);
+        line_2->setFrameShadow(QFrame::Sunken);
 
         hboxLayout->addWidget(CtrlPanel);
 
@@ -388,6 +403,8 @@ public:
         label_10->setText(QApplication::translate("MainWindowDesign", "Axis 5", 0, QApplication::UnicodeUTF8));
         label_11->setText(QApplication::translate("MainWindowDesign", "Axis 6", 0, QApplication::UnicodeUTF8));
         manualActute->setText(QApplication::translate("MainWindowDesign", "Actute", 0, QApplication::UnicodeUTF8));
+        radioButton_1->setText(QApplication::translate("MainWindowDesign", "Text mode", 0, QApplication::UnicodeUTF8));
+        radioButton_2->setText(QApplication::translate("MainWindowDesign", "Manual", 0, QApplication::UnicodeUTF8));
         groupBox_12->setTitle(QApplication::translate("MainWindowDesign", "Logging", 0, QApplication::UnicodeUTF8));
         connectRos->setText(QApplication::translate("MainWindowDesign", "Connect", 0, QApplication::UnicodeUTF8));
         tab_manager->setTabText(tab_manager->indexOf(tab_status), QApplication::translate("MainWindowDesign", "Ros Communications", 0, QApplication::UnicodeUTF8));

@@ -52,6 +52,8 @@ public Q_SLOTS:
 	void on_button_manualActute_clicked();
 	void on_checkbox_use_environment_stateChanged(int state);
 	void on_button_writeStart_clicked();
+        void on_button_radioButton_1_clicked();
+        void on_button_radioButton_2_clicked();
 
     /******************************************
     ** Manual connections

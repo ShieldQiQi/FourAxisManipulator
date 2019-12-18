@@ -48,6 +48,8 @@ public:
 
 	std_msgs::Float64MultiArray angleArray;
         std_msgs::String            textString;
+        // 0默认为字符模式,1为手动模式
+        bool workMode = 0;
 
 	/*********************
 	** Logging

@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+/home/pi/catkin_qi/src/fam/src/./include/inverseSolutonKiller.hpp
+cmath
+-
+
 /home/pi/catkin_qi/src/fam/src/./include/linkqueue.hpp
 iostream
 -
@@ -55,6 +59,8 @@ tf/transform_broadcaster.h
 -
 ./include/recognize.hpp
 /home/pi/catkin_qi/src/fam/src/./include/recognize.hpp
+./include/inverseSolutonKiller.hpp
+/home/pi/catkin_qi/src/fam/src/./include/inverseSolutonKiller.hpp
 
 /home/pi/catkin_qi/src/serial/include/serial/serial.h
 limits

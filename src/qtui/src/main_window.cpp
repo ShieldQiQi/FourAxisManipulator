@@ -46,7 +46,11 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     QObject::connect(ui.connectRos, SIGNAL(clicked()), this, SLOT(on_button_connectRos_clicked()));
     QObject::connect(ui.manualActute, SIGNAL(clicked()), this, SLOT(on_button_manualActute_clicked()));
     QObject::connect(ui.writeStart, SIGNAL(clicked()), this, SLOT(on_button_writeStart_clicked()));
-    
+    QObject::connect(ui.radioButton_1, SIGNAL(clicked()), this, SLOT(on_button_radioButton_1_clicked()));
+    QObject::connect(ui.radioButton_2, SIGNAL(clicked()), this, SLOT(on_button_radioButton_2_clicked()));
+
+    ui.radioButton_1->setChecked(1);
+
     /*********************
     ** Auto Start
     **********************/
@@ -121,6 +125,18 @@ void MainWindow::on_button_writeStart_clicked()
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     
     qnode.textString.data = ui.textInput->toPlainText().toStdString().data();
+}
+
+
+void MainWindow::on_button_radioButton_1_clicked()
+{
+    qnode.workMode = 0;
+}
+
+
+void MainWindow::on_button_radioButton_2_clicked()
+{
+    qnode.workMode = 1;
 }
 
 void MainWindow::on_button_manualActute_clicked() 

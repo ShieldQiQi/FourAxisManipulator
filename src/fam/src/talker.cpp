@@ -56,6 +56,8 @@ visualization_msgs::Marker points;
 visualization_msgs::Marker pointsOrigin;
 geometry_msgs::Point p;
 
+inverseSolutionKiller soluKiller;
+
 using namespace std;
 
 void draw_bitmap( FT_Bitmap*  bitmap, FT_Int x, FT_Int y)
@@ -273,7 +275,8 @@ void inverseSolution()
 {
     if (!travelQueue.isEmpty()) {
 
-
+        // get four axis angles throuth inverse manipulator kinematic
+        soluKiller.getThetaArray(travelQueue.getFront().x, travelQueue.getFront().y);
 
         travelQueue.pop();
     }else {
@@ -287,6 +290,21 @@ void updateAngles(const ros::TimerEvent& e)
             ser.read(r_buffer,6);
             //read_pub.publish(number);
     }
+
+    inverseSolution();
+
+    //定义报文头,用于底层判断轴角顺序
+    s_buffer[0] = 0;
+    ser.write(s_buffer,1);
+    //发送报文内容
+    s_buffer[0] = (uint8_t)soluKiller.angleArray[0];
+    s_buffer[1] = (uint8_t)soluKiller.angleArray[1];
+    s_buffer[2] = (uint8_t)soluKiller.angleArray[2];
+    s_buffer[3] = (uint8_t)soluKiller.angleArray[3];
+    s_buffer[4] = (uint8_t)soluKiller.angleArray[4];
+    s_buffer[5] = (uint8_t)soluKiller.angleArray[5];
+    ser.write(s_buffer,6);
+
     //定义报文头,用于底层判断轴角顺序
     s_buffer[0] = 0;
     ser.write(s_buffer,1);
