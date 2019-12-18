@@ -131,7 +131,16 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/pi/catkin_qi/build/catkin/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/model/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/qt_ros/qt_build/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/qt_ros/qt_create/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/qt_ros/qt_ros/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/serial/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/qt_ros/qt_tutorials/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/qtui/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/abb_1410_moveit_config/1410_URDF_test2/cmake_install.cmake")
   include("/home/pi/catkin_qi/build/fam/cmake_install.cmake")
+  include("/home/pi/catkin_qi/build/abb_1410_moveit_config/abb_moveit_config/cmake_install.cmake")
 
 endif()
 

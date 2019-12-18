@@ -58,12 +58,12 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     //ui.view_logging->hide();
     ui.dock_status->hide();
 
-    qnode.angleArray.data.push_back(0);
-    qnode.angleArray.data.push_back(1);
-    qnode.angleArray.data.push_back(2);
-    qnode.angleArray.data.push_back(3);
-    qnode.angleArray.data.push_back(4);
-    qnode.angleArray.data.push_back(5);
+    qnode.angleArray.data.push_back(210);
+    qnode.angleArray.data.push_back(150);
+    qnode.angleArray.data.push_back(80);
+    qnode.angleArray.data.push_back(60);
+    qnode.angleArray.data.push_back(80);
+    qnode.angleArray.data.push_back(100);
 }
 
 MainWindow::~MainWindow() {}

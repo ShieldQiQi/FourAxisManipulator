@@ -31,7 +31,7 @@
 /* origin is the upper left corner */
 unsigned char image[HEIGHT][WIDTH];
 unsigned char imageBuffer[HEIGHT][WIDTH];
-std_msgs::Float64 hipAngle;
+std_msgs::Float64MultiArray axisAngles;
 FT_Library    library;
 FT_Face       face;
 FT_GlyphSlot  slot;
@@ -47,7 +47,8 @@ int           n, num_chars;
 Recognize	  recognizer;
 LinkQueue<Point>  travelQueue;
 
-static uint8_t s_buffer[5];
+static uint8_t s_buffer[6];
+static uint8_t r_buffer[6]={0 ,0 ,0 ,0 ,0 ,0};
 serial::Serial ser; //声明串口对象
 
 visualization_msgs::Marker points;
@@ -109,8 +110,15 @@ std::wstring s2ws(const std::string& s)
 //话题回调
 void write_callback(const std_msgs::Float64MultiArray angleArray)
 {
-        ROS_INFO("I heard: [%f]", angleArray.data.at(0));
-        hipAngle.data =  angleArray.data.at(0);
+//        ROS_INFO("Target Angles:\n-------------------\n "
+//                 "Axis_one %.1f Axis_two %.1f Axis_three %.1f Axis_four %.1f Axis_five %.1f Axis_six %.1f\n",
+//                 angleArray.data.at(0),angleArray.data.at(1),angleArray.data.at(2),angleArray.data.at(3),angleArray.data.at(4),angleArray.data.at(5));
+        axisAngles.data.at(0) =  angleArray.data.at(0);
+        axisAngles.data.at(1) =  angleArray.data.at(1);
+        axisAngles.data.at(2) =  angleArray.data.at(2);
+        axisAngles.data.at(3) =  angleArray.data.at(3);
+        axisAngles.data.at(4) =  angleArray.data.at(4);
+        axisAngles.data.at(5) =  angleArray.data.at(5);
 }
 
 //---------------------------------------------------
@@ -260,102 +268,120 @@ void timerCallback(const ros::TimerEvent& e)
     }
 }
 
+void updateAngles(const ros::TimerEvent& e)
+{
+    if(ser.available()){
+            ser.read(r_buffer,6);
+            //read_pub.publish(number);
+    }
+    //定义报文头,用于底层判断轴角顺序
+    s_buffer[0] = 0;
+    ser.write(s_buffer,1);
+    //发送报文内容
+    s_buffer[0] = (uint8_t)axisAngles.data.at(0);
+    s_buffer[1] = (uint8_t)axisAngles.data.at(1);
+    s_buffer[2] = (uint8_t)axisAngles.data.at(2);
+    s_buffer[3] = (uint8_t)axisAngles.data.at(3);
+    s_buffer[4] = (uint8_t)axisAngles.data.at(4);
+    s_buffer[5] = (uint8_t)axisAngles.data.at(5);
+    ser.write(s_buffer,6);
+}
+
 //---------------------------------------------------------------------------------------------
 
 int main (int argc, char** argv)
 {
-        //------------------------------------------------------------------
-        //Init the ROS node
-        ros::init(argc, argv, "SerialTalker");
-        ros::NodeHandle nh;
-        //订阅话题，将角度命令发送至驱动板执行
-        ros::Subscriber write_sub = nh.subscribe("Qt_Msg", 1000, write_callback);
-        //订阅QT话题，接收字符串
-        ros::Subscriber textString_sub = nh.subscribe("Qt_textString", 1000, readTextString_callback);
-        //发布话题
-        ros::Publisher read_pub = nh.advertise<std_msgs::Int32>("stm_publish", 1000);
-        //Init the Marker(textPoint) in RVIZ
-        ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
-        //添加RVIZ默认坐标系和Maker坐标系textFrame的坐标系转换关系
-        tf::TransformBroadcaster broadcaster;
+    //------------------------------------------------------------------
+    //Init the ROS node
+    ros::init(argc, argv, "SerialTalker");
+    ros::NodeHandle nh;
+    //订阅话题，将角度命令发送至驱动板执行
+    ros::Subscriber write_sub = nh.subscribe("Qt_Msg", 1000, write_callback);
+    //订阅QT话题，接收字符串
+    ros::Subscriber textString_sub = nh.subscribe("Qt_textString", 1000, readTextString_callback);
+    //发布话题
+    ros::Publisher read_pub = nh.advertise<std_msgs::Int32>("stm_publish", 1000);
+    //Init the Marker(textPoint) in RVIZ
+    ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
+    //添加RVIZ默认坐标系和Maker坐标系textFrame的坐标系转换关系
+    tf::TransformBroadcaster broadcaster;
 
-        ros::Timer timer = nh.createTimer(ros::Duration(0.2), timerCallback);
+    ros::Timer timer_1 = nh.createTimer(ros::Duration(0.2), timerCallback);
+    axisAngles.data.push_back(210);
+    axisAngles.data.push_back(150);
+    axisAngles.data.push_back(80);
+    axisAngles.data.push_back(60);
+    axisAngles.data.push_back(80);
+    axisAngles.data.push_back(100);
+    //串口更新控制频率 == 50HZ
+    ros::Timer timer_2 = nh.createTimer(ros::Duration(0.02), updateAngles);
 
-        //------------------------------------------------------------------
-        //Init the FreeType
+    //------------------------------------------------------------------
+    //Init the FreeType
 
-        filename = "/usr/share/fonts/truetype/兰亭黑简.TTF";
-        angle         = ( 0 / 360 ) * 3.14159 * 2;
-        target_height = HEIGHT;
-        FT_Init_FreeType( &library );
+    filename = "/usr/share/fonts/truetype/兰亭黑简.TTF";
+    angle         = ( 0 / 360 ) * 3.14159 * 2;
+    target_height = HEIGHT;
+    FT_Init_FreeType( &library );
 
-        matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
-        matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L );
-        matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
-        matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
-        pen.x = 15 * 64;
-        pen.y = ( target_height - 100 ) * 64;
-        //------------------------------------------------------------------
-        //Init Serial Port communicating with stm32
+    matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
+    matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L );
+    matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
+    matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
+    pen.x = 15 * 64;
+    pen.y = ( target_height - 100 ) * 64;
+    //------------------------------------------------------------------
+    //Init Serial Port communicating with stm32
+    try
+    {
+            //设置串口属性，并打开串口
+            ser.setPort("/dev/ttyUSB0");
+            ser.setBaudrate(115200);
+            serial::Timeout to = serial::Timeout::simpleTimeout(1000);
+            ser.setTimeout(to);
+            ser.open();
+    }
+    catch (serial::IOException& e)
+    {
+            ROS_ERROR_STREAM("Unable to open port ");
+            //return -1;
+    }
+    //检测串口是否已经打开，并给出提示信息
+    if(ser.isOpen())
+    {
+            ROS_INFO_STREAM("Serial Port initialized");
+    }
+    else
+    {
+            ROS_ERROR_STREAM("Serial Port did not open");
+    }
 
-        try
-        {
-                //设置串口属性，并打开串口
-                ser.setPort("/dev/ttyUSB0");
-                ser.setBaudrate(115200);
-                serial::Timeout to = serial::Timeout::simpleTimeout(1000);
-                ser.setTimeout(to);
-                ser.open();
+    //------------------------------------------------------------------
+    //指定循环的频率
+
+    ros::Rate loop_rate(50);
+    int index = 0;
+    while(ros::ok())
+    {
+        //定义坐标系与世界坐标系的转化关系
+        broadcaster.sendTransform(tf::StampedTransform( tf::Transform(tf::Quaternion(0, 0, 0, 1),
+                                                                tf::Vector3(0.0, 0.0, 0.0)),ros::Time::now(),"map", "textFrame"));
+        //定时更新汉字在RVIZ中的显示
+        if(index==15)
+            marker_pub.publish(points);
+        else if (index ==30) {
+            marker_pub.publish(pointsOrigin);
+            index = 0;
         }
-        catch (serial::IOException& e)
-        {
-                ROS_ERROR_STREAM("Unable to open port ");
-                //return -1;
-        }
-        //检测串口是否已经打开，并给出提示信息
-        if(ser.isOpen())
-        {
-                ROS_INFO_STREAM("Serial Port initialized");
-        }
-        else
-        {
-                //return -1;
-        }
+        index++;
 
-        //------------------------------------------------------------------
-        //指定循环的频率
+        //loop_rate.sleep();
+        ros::spinOnce();
+    }
 
-        ros::Rate loop_rate(50);
-        int index = 0;
-        while(ros::ok())
-        {
-                if(ser.available()){
-                        std_msgs::String result;
-                        //result.data = ser.read(ser.available());
-                        int number = result.data[0]-' '+32;
-                        cout<< number << endl;
-                        //read_pub.publish(number);
-                }
-                s_buffer[0] = (uint8_t)hipAngle.data;
-                //ser.write(s_buffer,1);
-
-                broadcaster.sendTransform(tf::StampedTransform( tf::Transform(tf::Quaternion(0, 0, 0, 1),
-                                                                        tf::Vector3(0.0, 0.0, 0.0)),ros::Time::now(),"map", "textFrame"));
-                if(index==15)
-                    marker_pub.publish(points);
-                else if (index ==30) {
-                    marker_pub.publish(pointsOrigin);
-                    index = 0;
-                }
-                //loop_rate.sleep();
-                ros::spinOnce();
-
-                index++;
-        }
-
-        //------------------------------------------------------------------
-        //Exit and delete the Freetype value
-        FT_Done_FreeType( library );
+    //------------------------------------------------------------------
+    //Exit and delete the Freetype value
+    FT_Done_FreeType( library );
 }
 
 

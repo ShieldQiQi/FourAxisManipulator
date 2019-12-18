@@ -132,6 +132,9 @@ p, li { white-space: pre-wrap; }
           <height>32</height>
          </rect>
         </property>
+        <property name="text">
+         <string>210</string>
+        </property>
        </widget>
        <widget class="QLineEdit" name="axisTwo">
         <property name="geometry">
@@ -141,6 +144,9 @@ p, li { white-space: pre-wrap; }
           <width>113</width>
           <height>32</height>
          </rect>
+        </property>
+        <property name="text">
+         <string>150</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="axisThree">
@@ -152,6 +158,9 @@ p, li { white-space: pre-wrap; }
           <height>32</height>
          </rect>
         </property>
+        <property name="text">
+         <string>80</string>
+        </property>
        </widget>
        <widget class="QLineEdit" name="axisFour">
         <property name="geometry">
@@ -161,6 +170,9 @@ p, li { white-space: pre-wrap; }
           <width>113</width>
           <height>32</height>
          </rect>
+        </property>
+        <property name="text">
+         <string>60</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="axisFive">
@@ -172,6 +184,9 @@ p, li { white-space: pre-wrap; }
           <height>32</height>
          </rect>
         </property>
+        <property name="text">
+         <string>80</string>
+        </property>
        </widget>
        <widget class="QLineEdit" name="axisSix">
         <property name="geometry">
@@ -181,6 +196,9 @@ p, li { white-space: pre-wrap; }
           <width>113</width>
           <height>32</height>
          </rect>
+        </property>
+        <property name="text">
+         <string>400</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_6">
@@ -275,8 +293,6 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </widget>
-      <zorder>frame_2</zorder>
-      <zorder>tab_manager</zorder>
      </widget>
     </item>
     <item>
@@ -378,7 +394,7 @@ p, li { white-space: pre-wrap; }
     <string>Command Panel</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout">

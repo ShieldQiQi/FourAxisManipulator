@@ -47,7 +47,7 @@ public:
 	void run();
 
 	std_msgs::Float64MultiArray angleArray;
-	std_msgs::String			textString;
+        std_msgs::String            textString;
 
 	/*********************
 	** Logging

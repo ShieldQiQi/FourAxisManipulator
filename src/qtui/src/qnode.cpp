@@ -48,7 +48,7 @@ bool QNode::init() {
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
 	// Add your ros communications here.
-	chatter_publisher = n.advertise<std_msgs::Float64MultiArray>("Qtw_Msg", 1000);
+        chatter_publisher = n.advertise<std_msgs::Float64MultiArray>("Qt_Msg", 1000);
 	textString_publisher = n.advertise<std_msgs::String>("Qt_textString", 1000);
 	start();
 	return true;
@@ -65,7 +65,7 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
 	// Add your ros communications here.
-	chatter_publisher = n.advertise<std_msgs::Float64MultiArray>("Qtw_Msg", 1000);
+        chatter_publisher = n.advertise<std_msgs::Float64MultiArray>("Qt_Msg", 1000);
 	textString_publisher = n.advertise<std_msgs::String>("Qt_textString", 1000);
 	start();
 	return true;
