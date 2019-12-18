@@ -25,6 +25,7 @@
 #include <cmath>
 #include <tf/transform_broadcaster.h>
 #include "./include/recognize.hpp"
+#include "./include/inverseSolutonKiller.hpp"
 
 #define WIDTH   1000
 #define HEIGHT  150
@@ -262,6 +263,18 @@ void timerCallback(const ros::TimerEvent& e)
         p.y = 0.012*travelQueue.getFront().x;
         p.z = 0;
         pointsOrigin.points.push_back(p);
+        travelQueue.pop();
+    }else {
+        travelQueue.ClearQueue();
+    }
+}
+
+void inverseSolution()
+{
+    if (!travelQueue.isEmpty()) {
+
+
+
         travelQueue.pop();
     }else {
         travelQueue.ClearQueue();
