@@ -25,3 +25,10 @@ Simplify the Text to dashs from outlines and solid first, then sort the pointque
 <br>
 hand-writing habits. But the effects is not obvious, need for more revolution...
 
+## 2019/12/18
+
+add inverse dynamic solution from pointQueue, send the joint space angles to stm32...
+<br>
+approve the algorithm of sorting the pointqueue...
+
+
