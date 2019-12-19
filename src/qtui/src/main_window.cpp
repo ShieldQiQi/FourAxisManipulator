@@ -68,6 +68,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     qnode.angleArray.data.push_back(60);
     qnode.angleArray.data.push_back(80);
     qnode.angleArray.data.push_back(100);
+    qnode.angleArray.data.push_back(0);
 }
 
 MainWindow::~MainWindow() {}
@@ -131,12 +132,14 @@ void MainWindow::on_button_writeStart_clicked()
 void MainWindow::on_button_radioButton_1_clicked()
 {
     qnode.workMode = 0;
+    qnode.angleArray.data.at(6) = 0;
 }
 
 
 void MainWindow::on_button_radioButton_2_clicked()
 {
     qnode.workMode = 1;
+    qnode.angleArray.data.at(6) = 1;
 }
 
 void MainWindow::on_button_manualActute_clicked() 

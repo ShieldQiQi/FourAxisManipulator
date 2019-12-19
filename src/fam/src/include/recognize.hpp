@@ -40,7 +40,7 @@ public:
         //构造点缓存队列
         LinkQueue<Point> pointQueue;
 
-        LinkQueue<Point> Analyse(unsigned char (&image)[HEIGHT][WIDTH]);
+        void Analyse(unsigned char (&image)[HEIGHT][WIDTH]);
 
         unsigned char imageTemp[HEIGHT][WIDTH];
 
@@ -216,7 +216,7 @@ void Recognize::sortPointQueue(int i, int j)
     }
 }
 
-LinkQueue<Point> Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
+void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
 {
     findPath(image);
     buildNewImageBuffer(image);
@@ -237,7 +237,7 @@ LinkQueue<Point> Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
         }
     }
 
-    return pointQueue;
+    //return pointQueue;
 }
 
 Recognize::Recognize()

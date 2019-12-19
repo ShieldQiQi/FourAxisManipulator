@@ -47,13 +47,15 @@ int           n, num_chars;
 
 Recognize	  recognizer;
 LinkQueue<Point>  travelQueue;
+LinkQueue<Point>  travelQueueIdeal;
 
 static uint8_t s_buffer[6];
 static uint8_t r_buffer[6]={0 ,0 ,0 ,0 ,0 ,0};
 serial::Serial ser; //声明串口对象
 
 visualization_msgs::Marker points;
-visualization_msgs::Marker pointsOrigin;
+visualization_msgs::Marker pointWork;
+visualization_msgs::Marker pointIdeal;
 geometry_msgs::Point p;
 
 inverseSolutionKiller soluKiller;
@@ -110,27 +112,14 @@ std::wstring s2ws(const std::string& s)
 }
 
 //---------------------------------------------------
-//话题回调
-void write_callback(const std_msgs::Float64MultiArray angleArray)
-{
-//        ROS_INFO("Target Angles:\n-------------------\n "
-//                 "Axis_one %.1f Axis_two %.1f Axis_three %.1f Axis_four %.1f Axis_five %.1f Axis_six %.1f\n",
-//                 angleArray.data.at(0),angleArray.data.at(1),angleArray.data.at(2),angleArray.data.at(3),angleArray.data.at(4),angleArray.data.at(5));
-        axisAngles.data.at(0) =  angleArray.data.at(0);
-        axisAngles.data.at(1) =  angleArray.data.at(1);
-        axisAngles.data.at(2) =  angleArray.data.at(2);
-        axisAngles.data.at(3) =  angleArray.data.at(3);
-        axisAngles.data.at(4) =  angleArray.data.at(4);
-        axisAngles.data.at(5) =  angleArray.data.at(5);
-}
-
-//---------------------------------------------------
 //更新文字在RVIZ中的显示
-void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointsOrigin)
+void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointWork)
 {
     points.points.clear();
     travelQueue.ClearQueue();
-    pointsOrigin.points.clear();
+    travelQueueIdeal.ClearQueue();
+    pointWork.points.clear();
+    pointIdeal.points.clear();
 
     points.header.frame_id  = "/textFrame";
     points.header.stamp = ros::Time::now();
@@ -146,29 +135,41 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     points.color.g = 1.0f;
     points.color.a = 1.0;
 
-    pointsOrigin.points.clear();
-
-    pointsOrigin.header.frame_id  = "/textFrame";
-    pointsOrigin.header.stamp = ros::Time::now();
-    pointsOrigin.ns = "textPoints";
-    pointsOrigin.action = visualization_msgs::Marker::ADD;
-    pointsOrigin.pose.orientation.w = 1.0;
-    pointsOrigin.id = 0;
-    pointsOrigin.type = visualization_msgs::Marker::POINTS;
+    pointWork.header.frame_id  = "/textFrame";
+    pointWork.header.stamp = ros::Time::now();
+    pointWork.ns = "textPoints";
+    pointWork.action = visualization_msgs::Marker::ADD;
+    pointWork.pose.orientation.w = 1.0;
+    pointWork.id = 0;
+    pointWork.type = visualization_msgs::Marker::POINTS;
     // POINTS markers use x and y scale for width/height respectively
-    pointsOrigin.scale.x = 0.0032;
-    pointsOrigin.scale.y = 0.0032;
-    pointsOrigin.color.b = 1.0f;
-    pointsOrigin.color.a = 1.0;
+    pointWork.scale.x = 0.0032;
+    pointWork.scale.y = 0.0032;
+    pointWork.color.b = 1.0f;
+    pointWork.color.a = 1.0;
 
-    travelQueue = recognizer.Analyse(image);
+    pointIdeal.header.frame_id  = "/textFrame";
+    pointIdeal.header.stamp = ros::Time::now();
+    pointIdeal.ns = "textPoints3";
+    pointIdeal.action = visualization_msgs::Marker::ADD;
+    pointIdeal.pose.orientation.w = 1.0;
+    pointIdeal.id = 0;
+    pointIdeal.type = visualization_msgs::Marker::POINTS;
+    // POINTS markers use x and y scale for width/height respectively
+    pointIdeal.scale.x = 0.0032;
+    pointIdeal.scale.y = 0.0032;
+    pointIdeal.color.r = 1.0f;
+    pointIdeal.color.a = 1.0;
+
+    recognizer.Analyse(image);
+    recognizer.pointQueue.Assignment(travelQueue,travelQueueIdeal);
     recognizer.pointQueue.ClearQueue();
 
-    for (int i = 0; i < WIDTH; ++i)
+    for (int i = 0; i < WIDTH; i++)
     {
-        for(int j =0;j<HEIGHT;j++)
+        for(int j =0; j< HEIGHT;j++)
         {
-            if(image[j][i] == 3){
+            if(image[j][i] == 3 || i == 130 || (j == HEIGHT-1 && i<=130)|| i == 0 || (j == 0 && i<=130)){
                 p.x = 0.012*(j-0);
                 p.y = 0.012*i;
                 p.z = 0;
@@ -214,6 +215,23 @@ void imageBinarization()
     }
 }
 
+//---------------------------------------------------
+//话题回调
+void write_callback(const std_msgs::Float64MultiArray angleArray)
+{
+//        ROS_INFO("Target Angles:\n-------------------\n "
+//                 "Axis_one %.1f Axis_two %.1f Axis_three %.1f Axis_four %.1f Axis_five %.1f Axis_six %.1f\n",
+//                 angleArray.data.at(0),angleArray.data.at(1),angleArray.data.at(2),angleArray.data.at(3),angleArray.data.at(4),angleArray.data.at(5));
+        axisAngles.data.at(0) =  angleArray.data.at(0);
+        axisAngles.data.at(1) =  angleArray.data.at(1);
+        axisAngles.data.at(2) =  angleArray.data.at(2);
+        axisAngles.data.at(3) =  angleArray.data.at(3);
+        axisAngles.data.at(4) =  angleArray.data.at(4);
+        axisAngles.data.at(5) =  angleArray.data.at(5);
+        axisAngles.data.at(6) =  angleArray.data.at(6);
+}
+
+
 void readTextString_callback(std_msgs::String textString)
 {
         //std_msgs::String  ---->  std::string   ------> std::wstring -------> const wchar_t*
@@ -248,7 +266,7 @@ void readTextString_callback(std_msgs::String textString)
         //show_image();
         //getOutline();
         imageBinarization();
-        updatePoints(points,pointsOrigin);
+        updatePoints(points,pointWork);
 
         pen.x = 15 * 64;
         pen.y = ( target_height - 100 ) * 64;
@@ -264,23 +282,39 @@ void timerCallback(const ros::TimerEvent& e)
         p.x = 0.012*travelQueue.getFront().y;
         p.y = 0.012*travelQueue.getFront().x;
         p.z = 0;
-        pointsOrigin.points.push_back(p);
+        pointWork.points.push_back(p);
         travelQueue.pop();
     }else {
         travelQueue.ClearQueue();
     }
 }
 
+void fowardSolution(float theta[6])
+{
+    // define D-H parameters and related...
+    double a1 = 0.016,a2 = 0.103,a3 = 0.097,x1 = 0.06;
+
+    p.x = 150/0.1*cos(theta[0])*(0.06+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
+    p.y = 150/0.1*sin(theta[0])*(0.06+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
+    ROS_INFO("X = %f Y = %f",p.x,p.y);
+    pointIdeal.points.push_back(p);
+}
+
 void inverseSolution()
 {
-    if (!travelQueue.isEmpty()) {
+    if (!travelQueueIdeal.isEmpty()) {
 
         // get four axis angles throuth inverse manipulator kinematic
-        soluKiller.getThetaArray(travelQueue.getFront().x, travelQueue.getFront().y);
+        soluKiller.getThetaArray(travelQueueIdeal.getFront().x*0.1/150, travelQueueIdeal.getFront().y*0.1/150);
 
-        travelQueue.pop();
+//        p.x = 0.012*travelQueueIdeal.getFront().y+1;
+//        p.y = 0.012*travelQueueIdeal.getFront().x;
+//        p.z = 0;
+//        pointIdeal.points.push_back(p);
+
+        travelQueueIdeal.pop();
     }else {
-        travelQueue.ClearQueue();
+        travelQueueIdeal.ClearQueue();
     }
 }
 
@@ -290,31 +324,29 @@ void updateAngles(const ros::TimerEvent& e)
             ser.read(r_buffer,6);
             //read_pub.publish(number);
     }
-
-    inverseSolution();
-
     //定义报文头,用于底层判断轴角顺序
     s_buffer[0] = 0;
     ser.write(s_buffer,1);
     //发送报文内容
-    s_buffer[0] = (uint8_t)soluKiller.angleArray[0];
-    s_buffer[1] = (uint8_t)soluKiller.angleArray[1];
-    s_buffer[2] = (uint8_t)soluKiller.angleArray[2];
-    s_buffer[3] = (uint8_t)soluKiller.angleArray[3];
-    s_buffer[4] = (uint8_t)soluKiller.angleArray[4];
-    s_buffer[5] = (uint8_t)soluKiller.angleArray[5];
-    ser.write(s_buffer,6);
+    if(axisAngles.data.at(6) == 0 && !travelQueueIdeal.isEmpty()){
 
-    //定义报文头,用于底层判断轴角顺序
-    s_buffer[0] = 0;
-    ser.write(s_buffer,1);
-    //发送报文内容
-    s_buffer[0] = (uint8_t)axisAngles.data.at(0);
-    s_buffer[1] = (uint8_t)axisAngles.data.at(1);
-    s_buffer[2] = (uint8_t)axisAngles.data.at(2);
-    s_buffer[3] = (uint8_t)axisAngles.data.at(3);
-    s_buffer[4] = (uint8_t)axisAngles.data.at(4);
-    s_buffer[5] = (uint8_t)axisAngles.data.at(5);
+        inverseSolution();
+        fowardSolution(soluKiller.angleArray);
+
+        s_buffer[0] = (uint8_t)soluKiller.angleArray[0];
+        s_buffer[1] = (uint8_t)soluKiller.angleArray[1];
+        s_buffer[2] = (uint8_t)soluKiller.angleArray[2];
+        s_buffer[3] = (uint8_t)soluKiller.angleArray[3];
+        s_buffer[4] = (uint8_t)soluKiller.angleArray[4];
+        s_buffer[5] = (uint8_t)soluKiller.angleArray[5];
+    }else {
+        s_buffer[0] = (uint8_t)axisAngles.data.at(0);
+        s_buffer[1] = (uint8_t)axisAngles.data.at(1);
+        s_buffer[2] = (uint8_t)axisAngles.data.at(2);
+        s_buffer[3] = (uint8_t)axisAngles.data.at(3);
+        s_buffer[4] = (uint8_t)axisAngles.data.at(4);
+        s_buffer[5] = (uint8_t)axisAngles.data.at(5);
+    }
     ser.write(s_buffer,6);
 }
 
@@ -344,6 +376,7 @@ int main (int argc, char** argv)
     axisAngles.data.push_back(60);
     axisAngles.data.push_back(80);
     axisAngles.data.push_back(100);
+    axisAngles.data.push_back(0);
     //串口更新控制频率 == 50HZ
     ros::Timer timer_2 = nh.createTimer(ros::Duration(0.02), updateAngles);
 
@@ -401,7 +434,9 @@ int main (int argc, char** argv)
         if(index==15)
             marker_pub.publish(points);
         else if (index ==30) {
-            marker_pub.publish(pointsOrigin);
+            marker_pub.publish(pointWork);
+        }else if (index ==45) {
+            marker_pub.publish(pointIdeal);
             index = 0;
         }
         index++;

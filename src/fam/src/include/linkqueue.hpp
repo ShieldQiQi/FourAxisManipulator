@@ -37,23 +37,27 @@ public:
     void DestoryQueue();    //销毁队列
     void ClearQueue();      //清空队列
 
-    void operator=(LinkQueue<T> t);
+    void Assignment(LinkQueue<T> &t1, LinkQueue<T> &t2);
 
     int count;              //队列元素个数
     Node<T>* phead;         //队列头
     Node<T>* pend;          //队列尾
 };
-//-----------------重载 =------------------/
+//-----------------队列赋值------------------/
 template <typename T>
-void LinkQueue<T>::operator=(LinkQueue<T> t)
+void LinkQueue<T>::Assignment(LinkQueue<T> &t1,LinkQueue<T> &t2)
 {
+    //重载后原队列会被清空
     Node<T>* pNode=new Node<T>();
-    pNode=t.phead->next;
+    pNode = this->phead->next;
 
     while(pNode!=nullptr)
     {
-        this->push(pNode->value);
-        pNode=pNode->next;
+        t1.push(pNode->value);
+        t2.push(pNode->value);
+
+        this->pop();
+        pNode = this->phead->next;
     }
 }
 
@@ -179,6 +183,7 @@ void LinkQueue<T>::ClearQueue()
         delete pNode;
     }
     pend = phead;
+    count = 0;
 }
 
 #endif // LINKQUEUE_H

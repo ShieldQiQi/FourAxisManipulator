@@ -79,9 +79,8 @@ void QNode::run() {
 
 		std_msgs::String msg;
 		std::stringstream ss;
-		
-                if(workMode)
-                    chatter_publisher.publish(angleArray);
+
+                chatter_publisher.publish(angleArray);
 		
 		if(stringBefore.data != this->textString.data){
                     if(!workMode){
