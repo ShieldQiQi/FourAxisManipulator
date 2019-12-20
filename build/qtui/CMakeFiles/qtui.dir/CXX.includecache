@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+/home/pi/catkin_qi/build/qtui/include/qtui/moc_main_window.cxx
+../../../../src/qtui/include/qtui/main_window.hpp
+/home/pi/catkin_qi/src/qtui/include/qtui/main_window.hpp
+
 /home/pi/catkin_qi/src/qtui/include/qtui/main_window.hpp
 QtGui/QMainWindow
 -
@@ -27,6 +31,14 @@ std_msgs/Float64MultiArray.h
 -
 std_msgs/String.h
 -
+
+/home/pi/catkin_qi/src/qtui/src/main.cpp
+QtGui
+-
+QApplication
+-
+../include/qtui/main_window.hpp
+/home/pi/catkin_qi/src/qtui/include/qtui/main_window.hpp
 
 /home/pi/catkin_qi/src/qtui/src/main_window.cpp
 QtGui

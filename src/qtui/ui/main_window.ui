@@ -133,7 +133,7 @@ p, li { white-space: pre-wrap; }
          </rect>
         </property>
         <property name="text">
-         <string>210</string>
+         <string>100</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="axisTwo">
@@ -198,7 +198,7 @@ p, li { white-space: pre-wrap; }
          </rect>
         </property>
         <property name="text">
-         <string>400</string>
+         <string>100</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_6">

@@ -62,12 +62,13 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     //ui.view_logging->hide();
     ui.dock_status->hide();
 
-    qnode.angleArray.data.push_back(210);
+    qnode.angleArray.data.push_back(100);
     qnode.angleArray.data.push_back(150);
     qnode.angleArray.data.push_back(80);
     qnode.angleArray.data.push_back(60);
     qnode.angleArray.data.push_back(80);
     qnode.angleArray.data.push_back(100);
+    qnode.angleArray.data.push_back(0);
     qnode.angleArray.data.push_back(0);
 }
 
@@ -150,6 +151,8 @@ void MainWindow::on_button_manualActute_clicked()
     qnode.angleArray.data.at(3) = ui.axisFour->text().toFloat();
     qnode.angleArray.data.at(4) = ui.axisFive->text().toFloat();
     qnode.angleArray.data.at(5) = ui.axisSix->text().toFloat();
+
+    qnode.angleArray.data.at(7) = 1;
 }
 
 void MainWindow::on_checkbox_use_environment_stateChanged(int state) {

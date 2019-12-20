@@ -390,12 +390,12 @@ public:
         label_4->setText(QApplication::translate("MainWindowDesign", "Text what you want write here", 0, QApplication::UnicodeUTF8));
         writeStart->setText(QApplication::translate("MainWindowDesign", "RUN", 0, QApplication::UnicodeUTF8));
         label_5->setText(QApplication::translate("MainWindowDesign", "Manual Mode", 0, QApplication::UnicodeUTF8));
-        axisOne->setText(QApplication::translate("MainWindowDesign", "210", 0, QApplication::UnicodeUTF8));
+        axisOne->setText(QApplication::translate("MainWindowDesign", "100", 0, QApplication::UnicodeUTF8));
         axisTwo->setText(QApplication::translate("MainWindowDesign", "150", 0, QApplication::UnicodeUTF8));
         axisThree->setText(QApplication::translate("MainWindowDesign", "80", 0, QApplication::UnicodeUTF8));
         axisFour->setText(QApplication::translate("MainWindowDesign", "60", 0, QApplication::UnicodeUTF8));
         axisFive->setText(QApplication::translate("MainWindowDesign", "80", 0, QApplication::UnicodeUTF8));
-        axisSix->setText(QApplication::translate("MainWindowDesign", "400", 0, QApplication::UnicodeUTF8));
+        axisSix->setText(QApplication::translate("MainWindowDesign", "100", 0, QApplication::UnicodeUTF8));
         label_6->setText(QApplication::translate("MainWindowDesign", "Axis 1", 0, QApplication::UnicodeUTF8));
         label_7->setText(QApplication::translate("MainWindowDesign", "Axis 2", 0, QApplication::UnicodeUTF8));
         label_8->setText(QApplication::translate("MainWindowDesign", "Axis 3", 0, QApplication::UnicodeUTF8));

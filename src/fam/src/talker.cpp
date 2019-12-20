@@ -45,6 +45,7 @@ double        angle;
 int           target_height;
 int           n, num_chars;
 int           fowardcount = 0;
+bool          is_angleArrayUpdated = 0;
 
 Recognize	  recognizer;
 LinkQueue<Point>  travelQueue;
@@ -227,6 +228,8 @@ void write_callback(const std_msgs::Float64MultiArray angleArray)
 //        ROS_INFO("Target Angles:\n-------------------\n "
 //                 "Axis_one %.1f Axis_two %.1f Axis_three %.1f Axis_four %.1f Axis_five %.1f Axis_six %.1f\n",
 //                 angleArray.data.at(0),angleArray.data.at(1),angleArray.data.at(2),angleArray.data.at(3),angleArray.data.at(4),angleArray.data.at(5));
+        if(angleArray.data.at(7) == 1)
+            is_angleArrayUpdated = 1;
         axisAngles.data.at(0) =  angleArray.data.at(0);
         axisAngles.data.at(1) =  angleArray.data.at(1);
         axisAngles.data.at(2) =  angleArray.data.at(2);
@@ -301,8 +304,8 @@ void fowardSolution(float theta[6])
 
     p.y = 1+0.012*150/0.1*cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
     p.x = 0.012*150/0.1*sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
-    ROS_INFO("------------\nOUTPUT:X = %f Y = %f foward count = %d",cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),
-            sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),fowardcount);
+//    ROS_INFO("------------\nOUTPUT:X = %f Y = %f foward count = %d",cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),
+//            sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),fowardcount);
     pointIdeal.points.push_back(p);
     fowardcount++;
 }
@@ -313,7 +316,7 @@ void inverseSolution()
 
         // get four axis angles throuth inverse manipulator kinematic
         soluKiller.getThetaArray(travelQueueIdeal.getFront().x*0.1/150, travelQueueIdeal.getFront().y*0.1/150);
-        ROS_INFO("INPUT:X = %f Y = %f",travelQueueIdeal.getFront().x*0.1/150,travelQueueIdeal.getFront().y*0.1/150);
+//        ROS_INFO("INPUT:X = %f Y = %f",travelQueueIdeal.getFront().x*0.1/150,travelQueueIdeal.getFront().y*0.1/150);
         travelQueueIdeal.pop();
     }else {
         travelQueueIdeal.ClearQueue();
@@ -326,14 +329,14 @@ void updateAngles(const ros::TimerEvent& e)
             ser.read(r_buffer,6);
             //read_pub.publish(number);
     }
-    //定义报文头,用于底层判断轴角顺序
-    s_buffer[0] = 0;
-    ser.write(s_buffer,1);
     //发送报文内容
     if(axisAngles.data.at(6) == 0 && !travelQueueIdeal.isEmpty()){
 
         inverseSolution();
         fowardSolution(soluKiller.angleArray);
+        //定义报文头,用于底层判断轴角顺序
+        s_buffer[0] = 0;
+        ser.write(s_buffer,1);
 
         s_buffer[0] = (uint8_t)soluKiller.angleArray[0];
         s_buffer[1] = (uint8_t)soluKiller.angleArray[1];
@@ -341,15 +344,29 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[3] = (uint8_t)soluKiller.angleArray[3];
         s_buffer[4] = (uint8_t)soluKiller.angleArray[4];
         s_buffer[5] = (uint8_t)soluKiller.angleArray[5];
-    }else {
+        ser.write(s_buffer,6);
+
+        ROS_INFO("-----------\nI Send:theta0 %d theta1 %d theta2 %d theta3 %d theta4 %d theta5 %d",
+                 s_buffer[0],s_buffer[1],s_buffer[2],s_buffer[3],s_buffer[4],s_buffer[5]);
+
+    }else if(axisAngles.data.at(6) == 1 && is_angleArrayUpdated == 1){
+        //定义报文头,用于底层判断轴角顺序
+        s_buffer[0] = 0;
+        ser.write(s_buffer,1);
+
         s_buffer[0] = (uint8_t)axisAngles.data.at(0);
         s_buffer[1] = (uint8_t)axisAngles.data.at(1);
         s_buffer[2] = (uint8_t)axisAngles.data.at(2);
         s_buffer[3] = (uint8_t)axisAngles.data.at(3);
         s_buffer[4] = (uint8_t)axisAngles.data.at(4);
         s_buffer[5] = (uint8_t)axisAngles.data.at(5);
+        ser.write(s_buffer,6);
+
+        ROS_INFO("-----------\nI Send:theta0 %d theta1 %d theta2 %d theta3 %d theta4 %d theta5 %d",
+                 s_buffer[0],s_buffer[1],s_buffer[2],s_buffer[3],s_buffer[4],s_buffer[5]);
+
+        is_angleArrayUpdated = 0;
     }
-    ser.write(s_buffer,6);
 }
 
 //---------------------------------------------------------------------------------------------
