@@ -44,6 +44,7 @@ wchar_t       *wcharText = L"齐";
 double        angle;
 int           target_height;
 int           n, num_chars;
+int           fowardcount = 0;
 
 Recognize	  recognizer;
 LinkQueue<Point>  travelQueue;
@@ -115,6 +116,7 @@ std::wstring s2ws(const std::string& s)
 //更新文字在RVIZ中的显示
 void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointWork)
 {
+    fowardcount = 0;
     points.points.clear();
     travelQueue.ClearQueue();
     travelQueueIdeal.ClearQueue();
@@ -158,11 +160,14 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     // POINTS markers use x and y scale for width/height respectively
     pointIdeal.scale.x = 0.0032;
     pointIdeal.scale.y = 0.0032;
-    pointIdeal.color.r = 1.0f;
-    pointIdeal.color.a = 1.0;
+    pointIdeal.color.g = 1.0f;
+    pointIdeal.color.r = 1.0;
+    pointIdeal.color.a = 1.0f;
 
     recognizer.Analyse(image);
     recognizer.pointQueue.Assignment(travelQueue,travelQueueIdeal);
+    ROS_INFO("-------------------------------------------\nThere are %d point in travelQueueIdeal"
+             ,travelQueueIdeal.getSize());
     recognizer.pointQueue.ClearQueue();
 
     for (int i = 0; i < WIDTH; i++)
@@ -294,10 +299,12 @@ void fowardSolution(float theta[6])
     // define D-H parameters and related...
     double a1 = 0.016,a2 = 0.103,a3 = 0.097,x1 = 0.06;
 
-    p.x = 150/0.1*cos(theta[0])*(0.06+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
-    p.y = 150/0.1*sin(theta[0])*(0.06+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
-    ROS_INFO("X = %f Y = %f",p.x,p.y);
+    p.y = 1+0.012*150/0.1*cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
+    p.x = 0.012*150/0.1*sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
+    ROS_INFO("------------\nOUTPUT:X = %f Y = %f foward count = %d",cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),
+            sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),fowardcount);
     pointIdeal.points.push_back(p);
+    fowardcount++;
 }
 
 void inverseSolution()
@@ -306,12 +313,7 @@ void inverseSolution()
 
         // get four axis angles throuth inverse manipulator kinematic
         soluKiller.getThetaArray(travelQueueIdeal.getFront().x*0.1/150, travelQueueIdeal.getFront().y*0.1/150);
-
-//        p.x = 0.012*travelQueueIdeal.getFront().y+1;
-//        p.y = 0.012*travelQueueIdeal.getFront().x;
-//        p.z = 0;
-//        pointIdeal.points.push_back(p);
-
+        ROS_INFO("INPUT:X = %f Y = %f",travelQueueIdeal.getFront().x*0.1/150,travelQueueIdeal.getFront().y*0.1/150);
         travelQueueIdeal.pop();
     }else {
         travelQueueIdeal.ClearQueue();
@@ -369,7 +371,7 @@ int main (int argc, char** argv)
     //添加RVIZ默认坐标系和Maker坐标系textFrame的坐标系转换关系
     tf::TransformBroadcaster broadcaster;
 
-    ros::Timer timer_1 = nh.createTimer(ros::Duration(0.2), timerCallback);
+    ros::Timer timer_1 = nh.createTimer(ros::Duration(0.04), timerCallback);
     axisAngles.data.push_back(210);
     axisAngles.data.push_back(150);
     axisAngles.data.push_back(80);

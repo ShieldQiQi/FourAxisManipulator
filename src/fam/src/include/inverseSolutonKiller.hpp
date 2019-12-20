@@ -38,11 +38,7 @@ bool inverseSolutionKiller::getThetaArray(double x,double y)
 
     double q = x/cos(angleArray[0]) - a1 - x1;
 
-    if(x > a3+x1)
-        angleArray[2] = -acos((0.09*0.09+q*q-a2*a2-a3*a3)/(2*a2*a3));
-    else {
-        angleArray[2] = acos((0.09*0.09+q*q-a2*a2-a3*a3)/(2*a2*a3));
-    }
+    angleArray[2] = -acos((0.09*0.09+q*q-a2*a2-a3*a3)/(2*a2*a3));
 
     double s2 = (-0.09-q*a3*sin(angleArray[2])/(a3*cos(angleArray[2])+a2))/
             (a3*cos(angleArray[2])+a2+a3*sin(angleArray[2])*(a3*sin(angleArray[2]))/(a3*cos(angleArray[2])+a2));
