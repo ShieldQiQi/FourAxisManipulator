@@ -335,7 +335,7 @@ void updateAngles(const ros::TimerEvent& e)
         inverseSolution();
         fowardSolution(soluKiller.angleArray);
         //定义报文头,用于底层判断轴角顺序
-        s_buffer[0] = 0;
+        s_buffer[0] = 255;
         ser.write(s_buffer,1);
 
         s_buffer[0] = (uint8_t)soluKiller.angleArray[0];
@@ -351,7 +351,7 @@ void updateAngles(const ros::TimerEvent& e)
 
     }else if(axisAngles.data.at(6) == 1 && is_angleArrayUpdated == 1){
         //定义报文头,用于底层判断轴角顺序
-        s_buffer[0] = 0;
+        s_buffer[0] = 255;
         ser.write(s_buffer,1);
 
         s_buffer[0] = (uint8_t)axisAngles.data.at(0);
