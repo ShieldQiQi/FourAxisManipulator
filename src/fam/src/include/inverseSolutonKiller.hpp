@@ -13,7 +13,7 @@ class inverseSolutionKiller
 {
 public:
 
-    inverseSolutionKiller(double a_1=0.016,double a_2=0.103,double a_3=0.097,double h_1=0.18,double h_2=0.09,double x_1=0.06);
+    inverseSolutionKiller(double a_1=0.016,double a_2=0.103,double a_3=0.097,double h_1=0.18,double h_2=0.09,double x_1=0.018);
     ~inverseSolutionKiller();
 
     float angleArray[6];
@@ -38,10 +38,10 @@ bool inverseSolutionKiller::getThetaArray(double x,double y)
 
     double q = x/cos(angleArray[0]) - a1 - x1;
 
-    angleArray[2] = -acos((0.09*0.09+q*q-a2*a2-a3*a3)/(2*a2*a3));
+    angleArray[2] = acos((0.09*0.09+q*q-a2*a2-a3*a3)/(2*a2*a3));
 
-    double s2 = (-0.09-q*a3*sin(angleArray[2])/(a3*cos(angleArray[2])+a2))/
-            (a3*cos(angleArray[2])+a2+a3*sin(angleArray[2])*(a3*sin(angleArray[2]))/(a3*cos(angleArray[2])+a2));
+    double s2 = (-q-0.09*(a3*cos(angleArray[2])+a2)/a3/sin(angleArray[2]))/
+            (a3*sin(angleArray[2])+(a3*cos(angleArray[2])+a2)*(a3*cos(angleArray[2])+a2)/(a3*sin(angleArray[2])));
     double c2 = (-0.09+q*(a3*cos(angleArray[2])+a2)/a3/sin(angleArray[2]))/
             (a3*sin(angleArray[2])+(a3*cos(angleArray[2])+a2)*(a3*cos(angleArray[2])+a2)/(a3*sin(angleArray[2])));
 

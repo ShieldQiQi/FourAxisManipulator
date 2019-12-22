@@ -46,12 +46,14 @@ int           target_height;
 int           n, num_chars;
 int           fowardcount = 0;
 bool          is_angleArrayUpdated = 0;
+double        x_before = 0;
+double        y_before = 0;
 
 Recognize	  recognizer;
 LinkQueue<Point>  travelQueue;
 LinkQueue<Point>  travelQueueIdeal;
 
-static uint8_t s_buffer[6];
+static uint8_t s_buffer[12];
 static uint8_t r_buffer[6]={0 ,0 ,0 ,0 ,0 ,0};
 serial::Serial ser; //声明串口对象
 
@@ -300,10 +302,10 @@ void timerCallback(const ros::TimerEvent& e)
 void fowardSolution(float theta[6])
 {
     // define D-H parameters and related...
-    double a1 = 0.016,a2 = 0.103,a3 = 0.097,x1 = 0.06;
+    double a1 = 0.016,a2 = 0.103,a3 = 0.097,x1 = 0.018;
 
-    p.y = 1+0.012*150/0.1*cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
-    p.x = 0.012*150/0.1*sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
+    p.y = -1+0.012*150/0.1*cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
+    p.x = +1.1+0.012*150/0.1*sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
 //    ROS_INFO("------------\nOUTPUT:X = %f Y = %f foward count = %d",cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),
 //            sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),fowardcount);
     pointIdeal.points.push_back(p);
@@ -315,8 +317,15 @@ void inverseSolution()
     if (!travelQueueIdeal.isEmpty()) {
 
         // get four axis angles throuth inverse manipulator kinematic
-        soluKiller.getThetaArray(travelQueueIdeal.getFront().x*0.1/150, travelQueueIdeal.getFront().y*0.1/150);
-//        ROS_INFO("INPUT:X = %f Y = %f",travelQueueIdeal.getFront().x*0.1/150,travelQueueIdeal.getFront().y*0.1/150);
+        if(pow(x_before - travelQueueIdeal.getFront().x,2) + pow(y_before - travelQueueIdeal.getFront().y,2) > 100){
+            soluKiller.getThetaArray((100-travelQueueIdeal.getFront().x)*0.1/150+0.154/*+0.173*/, travelQueueIdeal.getFront().y*0.1/150-0.06);
+            soluKiller.angleArray[1] -= 0.4;
+        }else {
+            soluKiller.getThetaArray((100-travelQueueIdeal.getFront().x)*0.1/150+0.154/*+0.173*/, travelQueueIdeal.getFront().y*0.1/150-0.06);
+        }
+        x_before = travelQueueIdeal.getFront().x;
+        y_before = travelQueueIdeal.getFront().y;
+        ROS_INFO("INPUT:X = %f Y = %f",(100-travelQueueIdeal.getFront().x)*0.1/150+0.154,travelQueueIdeal.getFront().y*0.1/150-0.06);
         travelQueueIdeal.pop();
     }else {
         travelQueueIdeal.ClearQueue();
@@ -336,34 +345,50 @@ void updateAngles(const ros::TimerEvent& e)
         fowardSolution(soluKiller.angleArray);
         //定义报文头,用于底层判断轴角顺序
         s_buffer[0] = 255;
-        ser.write(s_buffer,1);
+        s_buffer[1] = 255;
+        //ser.write(s_buffer,2);
 
-        s_buffer[0] = (uint8_t)soluKiller.angleArray[0];
-        s_buffer[1] = (uint8_t)soluKiller.angleArray[1];
-        s_buffer[2] = (uint8_t)soluKiller.angleArray[2];
-        s_buffer[3] = (uint8_t)soluKiller.angleArray[3];
-        s_buffer[4] = (uint8_t)soluKiller.angleArray[4];
-        s_buffer[5] = (uint8_t)soluKiller.angleArray[5];
-        ser.write(s_buffer,6);
+        s_buffer[0] = (uint8_t)(soluKiller.angleArray[0]/3.14159*180+180);
+        s_buffer[1] = (uint8_t)((uint16_t(soluKiller.angleArray[0]/3.14159*180+180)) >> 8);
+        s_buffer[2] = (uint8_t)(soluKiller.angleArray[1]/3.14159*180+180);
+        s_buffer[3] = (uint8_t)((uint16_t(soluKiller.angleArray[1]/3.14159*180+180)) >> 8);
+        s_buffer[4] = (uint8_t)(soluKiller.angleArray[2]/3.14159*180+180);
+        s_buffer[5] = (uint8_t)((uint16_t(soluKiller.angleArray[2]/3.14159*180+180)) >> 8);
+        s_buffer[6] = (uint8_t)(soluKiller.angleArray[3]/3.14159*180+180);
+        s_buffer[7] = (uint8_t)((uint16_t(soluKiller.angleArray[3]/3.14159*180+180)) >> 8);
+        s_buffer[8] = (uint8_t)(soluKiller.angleArray[4]/3.14159*180+180);
+        s_buffer[9] = (uint8_t)((uint16_t(soluKiller.angleArray[4]/3.14159*180+180)) >> 8);
+        s_buffer[10] = (uint8_t)(soluKiller.angleArray[5]/3.14159*180+180);
+        s_buffer[11] = (uint8_t)((uint16_t(soluKiller.angleArray[5]/3.14159*180+180)) >> 8);
+        //ser.write(s_buffer,12);
 
-        ROS_INFO("-----------\nI Send:theta0 %d theta1 %d theta2 %d theta3 %d theta4 %d theta5 %d",
-                 s_buffer[0],s_buffer[1],s_buffer[2],s_buffer[3],s_buffer[4],s_buffer[5]);
+        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
+                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
+                soluKiller.angleArray[3]/3.14159*180,soluKiller.angleArray[4]/3.14159*180,soluKiller.angleArray[5]/3.14159*180);
 
     }else if(axisAngles.data.at(6) == 1 && is_angleArrayUpdated == 1){
         //定义报文头,用于底层判断轴角顺序
         s_buffer[0] = 255;
-        ser.write(s_buffer,1);
+        s_buffer[1] = 255;
+        ser.write(s_buffer,2);
 
-        s_buffer[0] = (uint8_t)axisAngles.data.at(0);
-        s_buffer[1] = (uint8_t)axisAngles.data.at(1);
-        s_buffer[2] = (uint8_t)axisAngles.data.at(2);
-        s_buffer[3] = (uint8_t)axisAngles.data.at(3);
-        s_buffer[4] = (uint8_t)axisAngles.data.at(4);
-        s_buffer[5] = (uint8_t)axisAngles.data.at(5);
-        ser.write(s_buffer,6);
+        s_buffer[0] = (uint8_t)(axisAngles.data.at(0)/3.14159*180+180);
+        s_buffer[1] = (uint8_t)((uint16_t(axisAngles.data.at(0)/3.14159*180+180)) >> 8);
+        s_buffer[2] = (uint8_t)(axisAngles.data.at(1)/3.14159*180+180);
+        s_buffer[3] = (uint8_t)((uint16_t(axisAngles.data.at(1)/3.14159*180+180)) >> 8);
+        s_buffer[4] = (uint8_t)(axisAngles.data.at(2)/3.14159*180+180);
+        s_buffer[5] = (uint8_t)((uint16_t(axisAngles.data.at(2)/3.14159*180+180)) >> 8);
+        s_buffer[6] = (uint8_t)(axisAngles.data.at(3)/3.14159*180+180);
+        s_buffer[7] = (uint8_t)((uint16_t(axisAngles.data.at(3)/3.14159*180+180)) >> 8);
+        s_buffer[8] = (uint8_t)(axisAngles.data.at(4)/3.14159*180+180);
+        s_buffer[9] = (uint8_t)((uint16_t(axisAngles.data.at(4)/3.14159*180+180)) >> 8);
+        s_buffer[10] = (uint8_t)(axisAngles.data.at(5)/3.14159*180+180);
+        s_buffer[11] = (uint8_t)((uint16_t(axisAngles.data.at(5)/3.14159*180+180)) >> 8);
+        ser.write(s_buffer,12);
 
-        ROS_INFO("-----------\nI Send:theta0 %d theta1 %d theta2 %d theta3 %d theta4 %d theta5 %d",
-                 s_buffer[0],s_buffer[1],s_buffer[2],s_buffer[3],s_buffer[4],s_buffer[5]);
+        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
+                 axisAngles.data.at(0)/3.14159*180,axisAngles.data.at(1)/3.14159*180,axisAngles.data.at(2)/3.14159*180,
+                axisAngles.data.at(3)/3.14159*180,axisAngles.data.at(4)/3.14159*180,axisAngles.data.at(5)/3.14159*180);
 
         is_angleArrayUpdated = 0;
     }
