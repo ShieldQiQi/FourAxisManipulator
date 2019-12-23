@@ -219,6 +219,7 @@ void Recognize::sortPointQueue(int i, int j)
 void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
 {
     findPath(image);
+    ROS_INFO("There are %d points in queue",pointQueue.getSize());
     buildNewImageBuffer(image);
     for (int j =0;j < HEIGHT;j++)
     {

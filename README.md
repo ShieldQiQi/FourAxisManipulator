@@ -31,4 +31,10 @@ add inverse dynamic solution from pointQueue, send the joint space angles to stm
 <br>
 approve the algorithm of sorting the pointqueue...
 
+## 2019/12/23
+
+solve bug that points number increase after sort the points order..
+<br>
+solve bug that text occur distortion when write in reality..
+
 

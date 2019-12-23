@@ -325,7 +325,8 @@ void inverseSolution()
         }
         x_before = travelQueueIdeal.getFront().x;
         y_before = travelQueueIdeal.getFront().y;
-        ROS_INFO("INPUT:X = %f Y = %f",(100-travelQueueIdeal.getFront().x)*0.1/150+0.154,travelQueueIdeal.getFront().y*0.1/150-0.06);
+//        ROS_INFO("INPUT:X = %f Y = %f",(100-travelQueueIdeal.getFront().x)*0.1/150+0.154,travelQueueIdeal.getFront().y*0.1/150-0.06);
+        ROS_INFO("INPUT:X = %d Y = %d",travelQueueIdeal.getFront().x,travelQueueIdeal.getFront().y);
         travelQueueIdeal.pop();
     }else {
         travelQueueIdeal.ClearQueue();
@@ -362,9 +363,9 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[11] = (uint8_t)((uint16_t(soluKiller.angleArray[5]/3.14159*180+180)) >> 8);
         //ser.write(s_buffer,12);
 
-        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
-                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
-                soluKiller.angleArray[3]/3.14159*180,soluKiller.angleArray[4]/3.14159*180,soluKiller.angleArray[5]/3.14159*180);
+//        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
+//                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
+//                soluKiller.angleArray[3]/3.14159*180,soluKiller.angleArray[4]/3.14159*180,soluKiller.angleArray[5]/3.14159*180);
 
     }else if(axisAngles.data.at(6) == 1 && is_angleArrayUpdated == 1){
         //定义报文头,用于底层判断轴角顺序
@@ -386,9 +387,9 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[11] = (uint8_t)((uint16_t(axisAngles.data.at(5)/3.14159*180+180)) >> 8);
         ser.write(s_buffer,12);
 
-        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
-                 axisAngles.data.at(0)/3.14159*180,axisAngles.data.at(1)/3.14159*180,axisAngles.data.at(2)/3.14159*180,
-                axisAngles.data.at(3)/3.14159*180,axisAngles.data.at(4)/3.14159*180,axisAngles.data.at(5)/3.14159*180);
+//        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
+//                 axisAngles.data.at(0)/3.14159*180,axisAngles.data.at(1)/3.14159*180,axisAngles.data.at(2)/3.14159*180,
+//                axisAngles.data.at(3)/3.14159*180,axisAngles.data.at(4)/3.14159*180,axisAngles.data.at(5)/3.14159*180);
 
         is_angleArrayUpdated = 0;
     }
