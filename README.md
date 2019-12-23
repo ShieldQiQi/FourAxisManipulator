@@ -36,5 +36,6 @@ approve the algorithm of sorting the pointqueue...
 solve bug that points number increase after sort the points order..
 <br>
 solve bug that text occur distortion when write in reality..
-
+<br>
+distortion seems to be vanisheded after change the X and Y bias of the whole text..
 

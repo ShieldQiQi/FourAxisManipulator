@@ -318,15 +318,26 @@ void inverseSolution()
 
         // get four axis angles throuth inverse manipulator kinematic
         if(pow(x_before - travelQueueIdeal.getFront().x,2) + pow(y_before - travelQueueIdeal.getFront().y,2) > 100){
-            soluKiller.getThetaArray((100-travelQueueIdeal.getFront().x)*0.1/150+0.154/*+0.173*/, travelQueueIdeal.getFront().y*0.1/150-0.06);
+            soluKiller.getThetaArray((100-travelQueueIdeal.getFront().x)*0.1/150+0.134/*+0.173*/, travelQueueIdeal.getFront().y*0.1/150-0.03);
             soluKiller.angleArray[1] -= 0.4;
+//            soluKiller.angleArray[0] = 0;
+//            soluKiller.angleArray[1] = -1.92;
+//            soluKiller.angleArray[2] = 1.57;
+//            soluKiller.angleArray[3] = -1.57;
+//            soluKiller.angleArray[4] = 0.4;
+//            soluKiller.angleArray[5] = 0.4;
         }else {
-            soluKiller.getThetaArray((100-travelQueueIdeal.getFront().x)*0.1/150+0.154/*+0.173*/, travelQueueIdeal.getFront().y*0.1/150-0.06);
+//            soluKiller.angleArray[0] = 0;
+//            soluKiller.angleArray[1] = -1.92;
+//            soluKiller.angleArray[2] = 1.57;
+//            soluKiller.angleArray[3] = -1.57;
+//            soluKiller.angleArray[4] = 0.4;
+//            soluKiller.angleArray[5] = 0.4;
+            soluKiller.getThetaArray((100-travelQueueIdeal.getFront().x)*0.1/150+0.134/*+0.173*/, travelQueueIdeal.getFront().y*0.1/150-0.03);
         }
         x_before = travelQueueIdeal.getFront().x;
         y_before = travelQueueIdeal.getFront().y;
-//        ROS_INFO("INPUT:X = %f Y = %f",(100-travelQueueIdeal.getFront().x)*0.1/150+0.154,travelQueueIdeal.getFront().y*0.1/150-0.06);
-        ROS_INFO("INPUT:X = %d Y = %d",travelQueueIdeal.getFront().x,travelQueueIdeal.getFront().y);
+        ROS_INFO("INPUT:X = %f Y = %f",(100-travelQueueIdeal.getFront().x)*0.1/150+0.134,travelQueueIdeal.getFront().y*0.1/150-0.03);
         travelQueueIdeal.pop();
     }else {
         travelQueueIdeal.ClearQueue();
@@ -347,7 +358,7 @@ void updateAngles(const ros::TimerEvent& e)
         //定义报文头,用于底层判断轴角顺序
         s_buffer[0] = 255;
         s_buffer[1] = 255;
-        //ser.write(s_buffer,2);
+        ser.write(s_buffer,2);
 
         s_buffer[0] = (uint8_t)(soluKiller.angleArray[0]/3.14159*180+180);
         s_buffer[1] = (uint8_t)((uint16_t(soluKiller.angleArray[0]/3.14159*180+180)) >> 8);
@@ -361,11 +372,11 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[9] = (uint8_t)((uint16_t(soluKiller.angleArray[4]/3.14159*180+180)) >> 8);
         s_buffer[10] = (uint8_t)(soluKiller.angleArray[5]/3.14159*180+180);
         s_buffer[11] = (uint8_t)((uint16_t(soluKiller.angleArray[5]/3.14159*180+180)) >> 8);
-        //ser.write(s_buffer,12);
+        ser.write(s_buffer,12);
 
-//        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
-//                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
-//                soluKiller.angleArray[3]/3.14159*180,soluKiller.angleArray[4]/3.14159*180,soluKiller.angleArray[5]/3.14159*180);
+        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
+                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
+                soluKiller.angleArray[3]/3.14159*180,soluKiller.angleArray[4]/3.14159*180,soluKiller.angleArray[5]/3.14159*180);
 
     }else if(axisAngles.data.at(6) == 1 && is_angleArrayUpdated == 1){
         //定义报文头,用于底层判断轴角顺序

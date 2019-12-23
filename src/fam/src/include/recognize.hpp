@@ -54,7 +54,7 @@ public:
         void buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH]);
 
         //按照汉字笔画,给点队列排序构成路径
-        void sortPointQueue(int i, int j);
+        void sortPointQueue(int i, int j, bool is_firstLayer);
 	
 private:
 	
@@ -124,13 +124,14 @@ void Recognize::buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH])
 }
 
 //迭代排序
-void Recognize::sortPointQueue(int i, int j)
+void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
 {
     Point point;
-    if(imageTemp[j][i] == 2){
+    if(imageTemp[j][i] == 2 || !is_firstLayer){
         point.x = i;
         point.y = j;
-        pointQueue.push(point);
+        if(is_firstLayer)
+            pointQueue.push(point);
         //按照汉字书写习惯,从当前点的下半平面(不包括X轴反方向)寻找相邻点
         //优先级:右方>左下方>下方>右下方
 
@@ -150,8 +151,7 @@ void Recognize::sortPointQueue(int i, int j)
                     breakFlag = 1;
                 }
             }
-            imageTemp[j][i+n-1] = 2;
-            sortPointQueue(i+n-1,j);
+            sortPointQueue(i+n-1,j,0);
         }else if (imageTemp[j+1][i-1] == 2) {        //左下
             int n=1,m=1;
             int breakFlag = 0;
@@ -172,8 +172,7 @@ void Recognize::sortPointQueue(int i, int j)
                         }
                     }
             }
-            imageTemp[j+m-1][i-n+1] = 2;
-            sortPointQueue(i-n+1,j+m-1);
+            sortPointQueue(i-n+1,j+m-1,0);
         }else if (imageTemp[j+1][i] == 2) {         //下方
             int m=1;
             int breakFlag = 0;
@@ -188,8 +187,7 @@ void Recognize::sortPointQueue(int i, int j)
                     breakFlag = 1;
                 }
             }
-            imageTemp[j+m-1][i] = 2;
-            sortPointQueue(i,j+m-1);
+            sortPointQueue(i,j+m-1,0);
         }else if (imageTemp[j+1][i+1] == 2) {       //右下
             int n=1,m=1;
             int breakFlag = 0;
@@ -210,8 +208,7 @@ void Recognize::sortPointQueue(int i, int j)
                         }
                     }
             }
-            imageTemp[j+m-1][i+n-1] = 2;
-            sortPointQueue(i+n-1,j+m-1);
+            sortPointQueue(i+n-1,j+m-1,0);
         }
     }
 }
@@ -219,7 +216,6 @@ void Recognize::sortPointQueue(int i, int j)
 void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
 {
     findPath(image);
-    ROS_INFO("There are %d points in queue",pointQueue.getSize());
     buildNewImageBuffer(image);
     for (int j =0;j < HEIGHT;j++)
     {
@@ -230,15 +226,14 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
         }
     }
 
+    //from up to bottom and from left to right to travelse
     for (int j =0;j < HEIGHT;j++)
     {
         for(int i = 0; i < WIDTH; i++)
         {
-            sortPointQueue(i,j);
+            sortPointQueue(i,j,1);
         }
     }
-
-    //return pointQueue;
 }
 
 Recognize::Recognize()
