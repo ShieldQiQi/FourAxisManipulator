@@ -20,12 +20,14 @@
 //    https://bugreports.qt.io/browse/QTBUG-22829
 #ifndef Q_MOC_RUN
 #include <ros/ros.h>
+#include <std_msgs/Int32.h>
 #endif
 #include <string>
 #include <QThread>
 #include <QStringListModel>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Int32.h>
 
 /*****************************************************************************
 ** Namespaces
@@ -44,7 +46,7 @@ public:
 	virtual ~QNode();
 	bool init();
 	bool init(const std::string &master_url, const std::string &host_url);
-	void run();
+        void run();
 
 	std_msgs::Float64MultiArray angleArray;
         std_msgs::String            textString;
@@ -74,7 +76,8 @@ private:
 	char** init_argv;
 	ros::Publisher chatter_publisher;
 	ros::Publisher textString_publisher;
-    QStringListModel logging_model;
+        ros::Subscriber read_sub;
+        QStringListModel logging_model;
 };
 
 }  // namespace qtui

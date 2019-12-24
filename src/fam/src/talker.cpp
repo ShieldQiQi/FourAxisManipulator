@@ -33,6 +33,8 @@
 unsigned char image[HEIGHT][WIDTH];
 unsigned char imageBuffer[HEIGHT][WIDTH];
 std_msgs::Float64MultiArray axisAngles;
+ros::Publisher read_pub;
+std_msgs::Int32 temp;
 FT_Library    library;
 FT_Face       face;
 FT_GlyphSlot  slot;
@@ -54,7 +56,7 @@ LinkQueue<Point>  travelQueue;
 LinkQueue<Point>  travelQueueIdeal;
 
 static uint8_t s_buffer[12];
-static uint8_t r_buffer[6]={0 ,0 ,0 ,0 ,0 ,0};
+static uint8_t r_buffer[1]={0};
 serial::Serial ser; //声明串口对象
 
 visualization_msgs::Marker points;
@@ -253,6 +255,7 @@ void readTextString_callback(std_msgs::String textString)
 
         //draw the text to bitmap
         num_chars = wcslen(pWstrData);
+//        ROS_INFO(" num_chars = %d",num_chars);
 
         FT_New_Face( library, filename, 0, &face );
         //FT_Set_Char_Size( face, 30 * 64, 10*64, 400, 0 );
@@ -337,7 +340,7 @@ void inverseSolution()
         }
         x_before = travelQueueIdeal.getFront().x;
         y_before = travelQueueIdeal.getFront().y;
-        ROS_INFO("INPUT:X = %f Y = %f",(100-travelQueueIdeal.getFront().x)*0.1/150+0.134,travelQueueIdeal.getFront().y*0.1/150-0.03);
+//        ROS_INFO("INPUT:X = %f Y = %f",(100-travelQueueIdeal.getFront().x)*0.1/150+0.134,travelQueueIdeal.getFront().y*0.1/150-0.03);
         travelQueueIdeal.pop();
     }else {
         travelQueueIdeal.ClearQueue();
@@ -347,8 +350,10 @@ void inverseSolution()
 void updateAngles(const ros::TimerEvent& e)
 {
     if(ser.available()){
-            ser.read(r_buffer,6);
-            //read_pub.publish(number);
+            ser.read(r_buffer,1);
+            //ROS_INFO(" I Read = %d",r_buffer[0]);
+            temp.data = 1;
+            read_pub.publish(temp);
     }
     //发送报文内容
     if(axisAngles.data.at(6) == 0 && !travelQueueIdeal.isEmpty()){
@@ -374,9 +379,9 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[11] = (uint8_t)((uint16_t(soluKiller.angleArray[5]/3.14159*180+180)) >> 8);
         ser.write(s_buffer,12);
 
-        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
-                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
-                soluKiller.angleArray[3]/3.14159*180,soluKiller.angleArray[4]/3.14159*180,soluKiller.angleArray[5]/3.14159*180);
+//        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
+//                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
+//                soluKiller.angleArray[3]/3.14159*180,soluKiller.angleArray[4]/3.14159*180,soluKiller.angleArray[5]/3.14159*180);
 
     }else if(axisAngles.data.at(6) == 1 && is_angleArrayUpdated == 1){
         //定义报文头,用于底层判断轴角顺序
@@ -419,7 +424,7 @@ int main (int argc, char** argv)
     //订阅QT话题，接收字符串
     ros::Subscriber textString_sub = nh.subscribe("Qt_textString", 1000, readTextString_callback);
     //发布话题
-    ros::Publisher read_pub = nh.advertise<std_msgs::Int32>("stm_publish", 1000);
+    read_pub = nh.advertise<std_msgs::Int32>("stm_publish", 1000);
     //Init the Marker(textPoint) in RVIZ
     ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
     //添加RVIZ默认坐标系和Maker坐标系textFrame的坐标系转换关系

@@ -39,3 +39,7 @@ solve bug that text occur distortion when write in reality..
 <br>
 distortion seems to be vanisheded after change the X and Y bias of the whole text..
 
+## 2019/12/24
+
+improve code to write at most five texts in one time..
+

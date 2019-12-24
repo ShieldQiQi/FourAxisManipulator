@@ -27,6 +27,8 @@ namespace qtui {
 ** Implementation
 *****************************************************************************/
 
+bool is_nextText = 1;
+
 QNode::QNode(int argc, char** argv ) :
 	init_argc(argc),
 	init_argv(argv)
@@ -40,6 +42,13 @@ QNode::~QNode() {
 	wait();
 }
 
+void readStm32_callback(std_msgs::Int32 temp)
+{
+    if(temp.data == 1){
+        is_nextText = 1;
+    }
+}
+
 bool QNode::init() {
 	ros::init(init_argc,init_argv,"qtui");
 	if ( ! ros::master::check() ) {
@@ -50,6 +59,7 @@ bool QNode::init() {
 	// Add your ros communications here.
         chatter_publisher = n.advertise<std_msgs::Float64MultiArray>("Qt_Msg", 1000);
 	textString_publisher = n.advertise<std_msgs::String>("Qt_textString", 1000);
+        read_sub = n.subscribe("stm_publish", 1000, readStm32_callback);
 	start();
 	return true;
 }
@@ -67,6 +77,7 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 	// Add your ros communications here.
         chatter_publisher = n.advertise<std_msgs::Float64MultiArray>("Qt_Msg", 1000);
 	textString_publisher = n.advertise<std_msgs::String>("Qt_textString", 1000);
+        read_sub = n.subscribe("stm_publish", 1000, readStm32_callback);
 	start();
 	return true;
 }
@@ -74,7 +85,7 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 void QNode::run() {
 	ros::Rate loop_rate(1);
 	int count = 0;
-	std_msgs::String stringBefore;
+//	std_msgs::String stringBefore;
 	while ( ros::ok() ) {
 
 		std_msgs::String msg;
@@ -83,19 +94,28 @@ void QNode::run() {
                 chatter_publisher.publish(angleArray);
                 angleArray.data.at(7) = 0;
 
-		if(stringBefore.data != this->textString.data){
+                if(this->textString.data.length() != 0){
                     if(!workMode){
-			textString_publisher.publish(this->textString);
-			std::cout<<this->textString.data<<std::endl;
+                        if(is_nextText){
+                            std_msgs::String stringTemp;
+                            stringTemp.data = this->textString.data.substr(0, 3);
+                            textString_publisher.publish(stringTemp);
+
+                            this->textString.data.erase(0,3);
+
+                            is_nextText = 0;
+                        }
+//			textString_publisher.publish(this->textString);
+//			std::cout<<this->textString.data<<std::endl;
                     }
                 }
-                if(!workMode)
-                    stringBefore.data = this->textString.data;
+//                if(!workMode)
+//                    stringBefore.data = this->textString.data;
 
-		ss << angleArray.data.at(0) << " " << angleArray.data.at(1) << " " << angleArray.data.at(2) 
-			<< " " << angleArray.data.at(3) << " " << angleArray.data.at(4) << " " << angleArray.data.at(5);
-		msg.data = ss.str();
-		log(Info,std::string("I sent: ")+msg.data);
+                ss << angleArray.data.at(0) << " " << angleArray.data.at(1) << " " << angleArray.data.at(2)
+                        << " " << angleArray.data.at(3) << " " << angleArray.data.at(4) << " " << angleArray.data.at(5);
+                msg.data = ss.str();
+                log(Info,std::string("I sent: ")+msg.data);
 		ros::spinOnce();
 		loop_rate.sleep();
 		++count;
