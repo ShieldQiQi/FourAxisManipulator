@@ -246,47 +246,48 @@ void write_callback(const std_msgs::Float64MultiArray angleArray)
 
 void readTextString_callback(std_msgs::String textString)
 {
-        //std_msgs::String  ---->  std::string   ------> std::wstring -------> const wchar_t*
-        //ROS_INFO("I heard %s\n",textString.data);
-        string testStr(textString.data);
-        wstring wstrData;
-        wstrData = s2ws(testStr);
-        const wchar_t* pWstrData = wstrData.c_str();
+    x_before = y_before = 0;
+    //std_msgs::String  ---->  std::string   ------> std::wstring -------> const wchar_t*
+    //ROS_INFO("I heard %s\n",textString.data);
+    string testStr(textString.data);
+    wstring wstrData;
+    wstrData = s2ws(testStr);
+    const wchar_t* pWstrData = wstrData.c_str();
 
-        //draw the text to bitmap
-        num_chars = wcslen(pWstrData);
+    //draw the text to bitmap
+    num_chars = wcslen(pWstrData);
 //        ROS_INFO(" num_chars = %d",num_chars);
 
-        FT_New_Face( library, filename, 0, &face );
-        //FT_Set_Char_Size( face, 30 * 64, 10*64, 400, 0 );
-        FT_Set_Char_Size( face, 0, 15*64, 400, 550 );
-        slot = face->glyph;
+    FT_New_Face( library, filename, 0, &face );
+    //FT_Set_Char_Size( face, 30 * 64, 10*64, 400, 0 );
+    FT_Set_Char_Size( face, 0, 15*64, 400, 550 );
+    slot = face->glyph;
 
-        for ( n = 0; n < num_chars; n++ )
-        {
-                FT_Set_Transform( face, &matrix, &pen );
-                error = FT_Load_Char( face, pWstrData[n], FT_LOAD_RENDER );
-                //error = FT_Render_Glyph( face->glyph, FT_RENDER_MODE_NORMAL );
-                if ( error )
-                  continue;
-                draw_bitmap( &slot->bitmap,
-                                         slot->bitmap_left,
-                                         target_height - slot->bitmap_top );
+    for ( n = 0; n < num_chars; n++ )
+    {
+            FT_Set_Transform( face, &matrix, &pen );
+            error = FT_Load_Char( face, pWstrData[n], FT_LOAD_RENDER );
+            //error = FT_Render_Glyph( face->glyph, FT_RENDER_MODE_NORMAL );
+            if ( error )
+              continue;
+            draw_bitmap( &slot->bitmap,
+                                     slot->bitmap_left,
+                                     target_height - slot->bitmap_top );
 
-                pen.x += slot->advance.x;
-                pen.y += slot->advance.y;
-        }
-        //show_image();
-        //getOutline();
-        imageBinarization();
-        updatePoints(points,pointWork);
+            pen.x += slot->advance.x;
+            pen.y += slot->advance.y;
+    }
+    //show_image();
+    //getOutline();
+    imageBinarization();
+    updatePoints(points,pointWork);
 
-        pen.x = 15 * 64;
-        pen.y = ( target_height - 100 ) * 64;
-        FT_Done_Face(face);
-        for(int i = 0;i<WIDTH; i++)
-                for(int j =0;j<HEIGHT;j++)
-                        image[j][i] = 0;
+    pen.x = 15 * 64;
+    pen.y = ( target_height - 100 ) * 64;
+    FT_Done_Face(face);
+    for(int i = 0;i<WIDTH; i++)
+            for(int j =0;j<HEIGHT;j++)
+                    image[j][i] = 0;
 }
 
 void timerCallback(const ros::TimerEvent& e)
@@ -320,7 +321,7 @@ void inverseSolution()
     if (!travelQueueIdeal.isEmpty()) {
 
         // get four axis angles throuth inverse manipulator kinematic
-        if(pow(x_before - travelQueueIdeal.getFront().x,2) + pow(y_before - travelQueueIdeal.getFront().y,2) > 100){
+        if(x_before != 0 && y_before !=0 && (pow(x_before - travelQueueIdeal.getFront().x,2) + pow(y_before - travelQueueIdeal.getFront().y,2) > 100)){
             soluKiller.getThetaArray((100-travelQueueIdeal.getFront().x)*0.1/150+0.134/*+0.173*/, travelQueueIdeal.getFront().y*0.1/150-0.03);
             soluKiller.angleArray[1] -= 0.4;
 //            soluKiller.angleArray[0] = 0;
@@ -342,6 +343,7 @@ void inverseSolution()
         y_before = travelQueueIdeal.getFront().y;
 //        ROS_INFO("INPUT:X = %f Y = %f",(100-travelQueueIdeal.getFront().x)*0.1/150+0.134,travelQueueIdeal.getFront().y*0.1/150-0.03);
         travelQueueIdeal.pop();
+
     }else {
         travelQueueIdeal.ClearQueue();
     }
