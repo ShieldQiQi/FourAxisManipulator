@@ -139,7 +139,7 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     points.scale.x = 0.0032;
     points.scale.y = 0.0032;
     // Points are green
-    points.color.g = 1.0f;
+    points.color.b = 1.0f;
     points.color.a = 1.0;
 
     pointWork.header.frame_id  = "/textFrame";
@@ -152,7 +152,7 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     // POINTS markers use x and y scale for width/height respectively
     pointWork.scale.x = 0.0032;
     pointWork.scale.y = 0.0032;
-    pointWork.color.b = 1.0f;
+    pointWork.color.g = 1.0f;
     pointWork.color.a = 1.0;
 
     pointIdeal.header.frame_id  = "/textFrame";
@@ -294,7 +294,7 @@ void timerCallback(const ros::TimerEvent& e)
 {
     if (!travelQueue.isEmpty()) {
         p.x = 0.012*travelQueue.getFront().y;
-        p.y = 0.012*travelQueue.getFront().x;
+        p.y = 0.012*travelQueue.getFront().x+1;
         p.z = 0;
         pointWork.points.push_back(p);
         travelQueue.pop();
@@ -308,8 +308,8 @@ void fowardSolution(float theta[6])
     // define D-H parameters and related...
     double a1 = 0.016,a2 = 0.103,a3 = 0.097,x1 = 0.018;
 
-    p.y = -1+0.012*150/0.1*cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
-    p.x = +1.1+0.012*150/0.1*sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]));
+    p.y = -1+0.012*150/0.1*cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]))+0.6;
+    p.x = +1.1+0.012*150/0.1*sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2]))-0.6;
 //    ROS_INFO("------------\nOUTPUT:X = %f Y = %f foward count = %d",cos(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),
 //            sin(theta[0])*(x1+a1+a2*cos(theta[1])+a3*cos(theta[1]+theta[2])),fowardcount);
     pointIdeal.points.push_back(p);
@@ -353,10 +353,11 @@ void updateAngles(const ros::TimerEvent& e)
 {
     if(ser.available()){
             ser.read(r_buffer,1);
-            //ROS_INFO(" I Read = %d",r_buffer[0]);
             temp.data = 1;
             read_pub.publish(temp);
     }
+    temp.data = 1;
+    read_pub.publish(temp);
     //发送报文内容
     if(axisAngles.data.at(6) == 0 && !travelQueueIdeal.isEmpty()){
 
@@ -365,7 +366,7 @@ void updateAngles(const ros::TimerEvent& e)
         //定义报文头,用于底层判断轴角顺序
         s_buffer[0] = 255;
         s_buffer[1] = 255;
-        ser.write(s_buffer,2);
+//        ser.write(s_buffer,2);
 
         s_buffer[0] = (uint8_t)(soluKiller.angleArray[0]/3.14159*180+180);
         s_buffer[1] = (uint8_t)((uint16_t(soluKiller.angleArray[0]/3.14159*180+180)) >> 8);
@@ -379,7 +380,7 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[9] = (uint8_t)((uint16_t(soluKiller.angleArray[4]/3.14159*180+180)) >> 8);
         s_buffer[10] = (uint8_t)(soluKiller.angleArray[5]/3.14159*180+180);
         s_buffer[11] = (uint8_t)((uint16_t(soluKiller.angleArray[5]/3.14159*180+180)) >> 8);
-        ser.write(s_buffer,12);
+//        ser.write(s_buffer,12);
 
 //        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
 //                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
