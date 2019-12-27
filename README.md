@@ -45,4 +45,7 @@ improve code to write at most five texts in one time..
 
 ## 2019/12/27
 
+```
 correct the sorted path to make it more continuous and add "Anti-aliased" function...
+<br>
+use handwriting-zh_CN-gb2312.xml to get the right strokes order and make every stroke a whole points queue no matter how  complicated it is..
