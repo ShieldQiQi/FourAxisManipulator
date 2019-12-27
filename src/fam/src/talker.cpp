@@ -179,7 +179,7 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     {
         for(int j =0; j< HEIGHT;j++)
         {
-            if(image[j][i] == 3 || i == 130 || (j == HEIGHT-1 && i<=130)|| i == 0 || (j == 0 && i<=130)){
+            if(image[j][i] == 1 || i == 130 || (j == HEIGHT-1 && i<=130)|| i == 0 || (j == 0 && i<=130)){
                 p.x = 0.012*(j-0);
                 p.y = 0.012*i;
                 p.z = 0;
@@ -294,7 +294,7 @@ void timerCallback(const ros::TimerEvent& e)
 {
     if (!travelQueue.isEmpty()) {
         p.x = 0.012*travelQueue.getFront().y;
-        p.y = 0.012*travelQueue.getFront().x+1;
+        p.y = 0.012*travelQueue.getFront().x;
         p.z = 0;
         pointWork.points.push_back(p);
         travelQueue.pop();
@@ -382,9 +382,9 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[11] = (uint8_t)((uint16_t(soluKiller.angleArray[5]/3.14159*180+180)) >> 8);
 //        ser.write(s_buffer,12);
 
-//        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f theta5 %f theta6 %f",
-//                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
-//                soluKiller.angleArray[3]/3.14159*180,soluKiller.angleArray[4]/3.14159*180,soluKiller.angleArray[5]/3.14159*180);
+        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f",
+                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
+                soluKiller.angleArray[3]/3.14159*180);
 
     }else if(axisAngles.data.at(6) == 1 && is_angleArrayUpdated == 1){
         //定义报文头,用于底层判断轴角顺序

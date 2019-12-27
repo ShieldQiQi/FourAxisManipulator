@@ -43,3 +43,6 @@ distortion seems to be vanisheded after change the X and Y bias of the whole tex
 
 improve code to write at most five texts in one time..
 
+## 2019/12/27
+
+correct the sorted path to make it more continuous and add "Anti-aliased" function...

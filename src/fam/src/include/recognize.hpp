@@ -222,7 +222,7 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
         for(int i = 0; i < WIDTH; i++)
         {
             imageTemp[j][i] = image[j][i];
-            image[j][i] = image[j][i]==2?3:0;
+            image[j][i] = image[j][i]==2?3:image[j][i];
         }
     }
 
