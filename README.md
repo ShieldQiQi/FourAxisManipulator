@@ -3,7 +3,7 @@
 ***
 ### 大家好 这是我老婆
 
-<image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C01.png" width="180" alt="my lovely sister"/><image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C03.png" width="180" alt="my lovely sister"/><image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C.png" width="180" alt="my lovely sister"/><image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C02.png" width="180" alt="my lovely sister"/><image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C04.png" width="180" alt="my lovely sister"/>
+<image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C01.png" width="160" alt="my lovely sister"/><image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C03.png" width="160" alt="my lovely sister"/><image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C.png" width="160" alt="my lovely sister"/><image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C02.png" width="160" alt="my lovely sister"/><image src="https://github.com/ShieldQiQi/FourAxisManipulator/blob/masterX/Picture/%E5%B0%8F%E6%B7%B7%E6%B2%8C04.png" width="160" alt="my lovely sister"/>
 ***
 
 
