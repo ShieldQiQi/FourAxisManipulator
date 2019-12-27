@@ -1,7 +1,7 @@
 # FourAxisManipulator
 
 ## 2019/12/08
-
+```
 Finish transport a Chinese string from `Qt widget` to `Ros` stream then to `Freetype` demo
 
 Solve the problem that the newest text carry the before one.
@@ -9,7 +9,7 @@ Solve the problem that the newest text carry the before one.
 According to the offical doucuments<br>
 ![image] (https://github.com/ShieldQiQi/FourAxisManipulator/blob/master/Picture/FreetypeDocument.png)
 <br>So when in the case you frequently use the function, destory the face use "FT_Done_Face(face)" and make sure the image buffer is cleared to all zero.
-
+```
 
 ## 2019/12/11
 
@@ -47,5 +47,6 @@ improve code to write at most five texts in one time..
 
 ```
 correct the sorted path to make it more continuous and add "Anti-aliased" function...
-<br>
+
 use handwriting-zh_CN-gb2312.xml to get the right strokes order and make every stroke a whole points queue no matter how  complicated it is..
+```
