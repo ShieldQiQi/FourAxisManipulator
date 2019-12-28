@@ -4,6 +4,7 @@
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /home/pi/catkin_qi/src/fam/src/./include/inverseSolutonKiller.hpp
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /home/pi/catkin_qi/src/fam/src/./include/linkqueue.hpp
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /home/pi/catkin_qi/src/fam/src/./include/recognize.hpp
+fam/CMakeFiles/talker.dir/src/talker.cpp.o: /home/pi/catkin_qi/src/fam/src/./include/tinyxml2.hpp
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /home/pi/catkin_qi/src/fam/src/talker.cpp
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /home/pi/catkin_qi/src/serial/include/serial/serial.h
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /home/pi/catkin_qi/src/serial/include/serial/v8stdint.h
@@ -1374,4 +1375,5 @@ fam/CMakeFiles/talker.dir/src/talker.cpp.o: /usr/local/include/boost/visit_each.
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /usr/local/include/boost/weak_ptr.hpp
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /usr/local/include/freetype2/freetype/config/ftheader.h
 fam/CMakeFiles/talker.dir/src/talker.cpp.o: /usr/local/include/freetype2/ft2build.h
+fam/CMakeFiles/talker.dir/src/talker.cpp.o: /usr/local/include/sqlite3.h
 

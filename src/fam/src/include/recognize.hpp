@@ -8,6 +8,10 @@
 #define RECOGNIZE_H
 
 #include "linkqueue.hpp"
+#include "tinyxml2.hpp"
+#include <sqlite3.h>
+
+using namespace tinyxml2;
 
 /* @Parama defination
  * The point's 'X' position
@@ -55,10 +59,58 @@ public:
 
         //按照汉字笔画,给点队列排序构成路径
         void sortPointQueue(int i, int j, bool is_firstLayer);
+
+        //读取笔画顺序
+        bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement** destNode);
 	
 private:
 	
 };
+
+
+bool Recognize::GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement** destNode)
+{
+    setlocale(LC_ALL,"zh_CN.UTF-8");
+
+    //查找某一汉字,得到对应的笔画数据
+    // if equal root node then return
+    if (0 == strcmp(strNodeName, pRootEle->Value()))
+    {
+        *destNode = pRootEle;
+        return true;
+    }
+
+    XMLElement* pEle = pRootEle;
+    for (pEle = pRootEle->FirstChildElement(); pEle; pEle = pEle->NextSiblingElement())
+    {
+        // recursive find sub node return node pointer
+        if (0 != strcmp(pEle->Value(), strNodeName))
+        {
+            GetNodePointerByName(pEle,strNodeName,destNode);
+        }
+        else
+        {
+            *destNode = pEle;
+            ROS_INFO("destination node name: %s\n", pEle->Value());
+            return true;
+        }
+    }
+
+    return false;
+
+
+//    XMLDocument doc;
+//    if(doc.LoadFile( "/home/pi/catkin_qi/src/fam/stroke_data/handwriting-zh_CN-gb2312.xml" ) == 0)
+//        ROS_INFO("Load XML succesfully..");
+//    else
+//        ROS_INFO("Can not find this XML file..");
+//    const char* id = doc.FirstChildElement( "dictionary" )->FirstChildElement( "character" )->FirstChildElement( "utf8" )->GetText();
+//    ROS_INFO( "Name of Chinese: %s", id );
+//    tinyxml2::XMLText* textNode = doc.FirstChildElement( "dictionary" )->FirstChildElement( "character" )->FirstChildElement( "utf8" )->FirstChild()->ToText();
+//    ROS_INFO( "Name of Chinese: %s", textNode->Value() );
+}
+
+
 
 bool Recognize::isOutlinePoint(unsigned char imageBuffer[HEIGHT][WIDTH],int i,int j)
 {
@@ -123,7 +175,7 @@ void Recognize::buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH])
     pointQueue.ClearQueue();
 }
 
-//迭代排序
+//递归排序
 void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
 {
     Point point;

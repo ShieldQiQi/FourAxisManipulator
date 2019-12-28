@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/tinyxml.dir/src/tinyxml2.cpp.o  -o /home/pi/catkin_qi/devel/lib/fam/tinyxml  -L/usr/local/lib 

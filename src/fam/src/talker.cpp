@@ -484,6 +484,8 @@ int main (int argc, char** argv)
             ROS_ERROR_STREAM("Serial Port did not open");
     }
 
+//    recognizer.readStrokeOrder();
+
     //------------------------------------------------------------------
     //指定循环的频率
 
