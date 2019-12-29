@@ -123,6 +123,8 @@ std::wstring s2ws(const std::string& s)
 //更新文字在RVIZ中的显示
 void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointWork)
 {
+    setlocale(LC_ALL,"zh_CN.UTF-8");
+
     fowardcount = 0;
     points.points.clear();
     travelQueue.ClearQueue();
@@ -171,10 +173,21 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     pointIdeal.color.r = 1.0;
     pointIdeal.color.a = 1.0f;
 
-    recognizer.Analyse(image);
+    recognizer.Analyse(image,0);
     recognizer.pointQueue.Assignment(travelQueue,travelQueueIdeal);
-    ROS_INFO("-------------------------------------------\nThere are %d point in travelQueueIdeal"
-             ,travelQueueIdeal.getSize());
+
+    Node<Stroke>* pStrokeNode = recognizer.strokeQueue.phead->next;
+    for (;pStrokeNode !=nullptr;pStrokeNode = pStrokeNode->next) {
+        ROS_INFO("num %d:the stroke is '%s' which have %d point(s)",pStrokeNode->value.orderNum,pStrokeNode->value.strokeName,pStrokeNode->value.strokePointNum);
+        Node<Point>* pPointNode = pStrokeNode->value.strokePointQueue.phead->next;
+
+        for (;pPointNode!=nullptr;pPointNode = pPointNode->next) {
+            ROS_INFO("   the point(s) are x = %d y = %d",pPointNode->value.x,pPointNode->value.y);
+        }
+    }
+
+//    ROS_INFO("-------------------------------------------\nThere are %d point in travelQueueIdeal"
+//             ,travelQueueIdeal.getSize());
     recognizer.pointQueue.ClearQueue();
 
     for (int i = 0; i < WIDTH; i++)
@@ -260,10 +273,12 @@ void readTextString_callback(std_msgs::String textString)
     const char* strNodeName = testStr.c_str();
     bool Error = recognizer.GetNodePointerByName(pRootEle,strNodeName,destNode);
     if(Error == 0)
-        ROS_ERROR_STREAM("Could not find it...");
+        ROS_ERROR_STREAM("Could not find it in this XML...");
     else {
-        ROS_INFO("Find Chinese %s ",destNode->GetText());
+        ROS_WARN("Going to write Chinese '%s' ",destNode->GetText());
     }
+    recognizer.GetStrokeMsg(destNode);
+    ROS_INFO("There are %d stroke(s) in '%s', and They are:",recognizer.strokeQueue.getSize(),destNode->GetText());
 
     wstring wstrData;
     wstrData = s2ws(testStr);
@@ -493,7 +508,7 @@ int main (int argc, char** argv)
     //检测串口是否已经打开，并给出提示信息
     if(ser.isOpen())
     {
-            ROS_INFO_STREAM("Serial Port initialized");
+            ROS_WARN_STREAM("Serial Port initialized");
     }
     else
     {
@@ -501,7 +516,7 @@ int main (int argc, char** argv)
     }
     //加载笔画XML文件
     if(doc.LoadFile( "/home/pi/catkin_qi/src/fam/stroke_data/handwriting-zh_CN-gb2312.xml" ) == 0)
-        ROS_INFO("Load XML succesfully..");
+        ROS_WARN_STREAM("Load XML succesfully..");
     else
         ROS_ERROR_STREAM("Can not find this XML file..");
 

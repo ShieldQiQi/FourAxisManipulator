@@ -10,6 +10,7 @@
 #include "linkqueue.hpp"
 #include "tinyxml2.hpp"
 #include <sqlite3.h>
+#include <stdlib.h>
 
 using namespace tinyxml2;
 
@@ -30,6 +31,20 @@ struct Point
 
 };
 
+/* @Parama defination
+ * which stroke is
+ * the order num of the stroke in current Chinese
+ * how many point in this stroke
+ * the points queue in this stroke which include X and Y data message..
+ */
+struct Stroke
+{
+    char*               strokeName="横";
+    uint8_t             orderNum;
+    int                 strokePointNum;
+    LinkQueue<Point>    strokePointQueue;
+};
+
 const int WIDTH = 1000;
 const int HEIGHT = 150;
 
@@ -43,30 +58,56 @@ public:
 
         //构造点缓存队列
         LinkQueue<Point> pointQueue;
+        //笔画队列
+        LinkQueue<Stroke> strokeQueue;
 
-        void Analyse(unsigned char (&image)[HEIGHT][WIDTH]);
-
+        void Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML);
         unsigned char imageTemp[HEIGHT][WIDTH];
-
         //判断点是否为轮廓点
         bool isOutlinePoint(unsigned char imageBuffer[HEIGHT][WIDTH],int i,int j);
-
         //寻找路径点
         void findPath(unsigned char imageBuffer[HEIGHT][WIDTH]);
-
         //删除原有的实心汉字,构造由点构成的新汉字
         void buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH]);
-
         //按照汉字笔画,给点队列排序构成路径
         void sortPointQueue(int i, int j, bool is_firstLayer);
-
         //读取笔画顺序
         bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode);
+        bool GetStrokeMsg(XMLElement* destNode);
 	
 private:
 	
 };
 
+
+bool Recognize::GetStrokeMsg(XMLElement* destNode)
+{
+    strokeQueue.ClearQueue();
+
+    XMLElement* pEle = destNode;
+    XMLElement* pEleDeeper;
+    int strokecount = 0;
+    int pointcount = 0;
+    for(pEle = destNode->NextSiblingElement()->FirstChildElement();pEle;pEle = pEle->NextSiblingElement())
+    {
+        Point pointTemp;
+        Stroke strokeTemp;
+
+        for(pointcount = 0,pEleDeeper = pEle->FirstChildElement();pEleDeeper;pEleDeeper = pEleDeeper->NextSiblingElement())
+        {
+            pointTemp.x = atoi(pEleDeeper->Attribute("x"));
+            pointTemp.y = atoi(pEleDeeper->Attribute("y"));
+            strokeTemp.strokePointQueue.push(pointTemp);
+            pointcount++;
+        }
+        strokeTemp.orderNum = strokecount+1;
+        strokeTemp.strokePointNum = pointcount;
+        strokeQueue.push(strokeTemp);
+        ROS_INFO("%d",strokeQueue.phead->next->value.strokePointQueue.phead->next == nullptr);
+
+        strokecount++;
+    }
+}
 
 bool Recognize::GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode)
 {
@@ -118,8 +159,6 @@ bool Recognize::GetNodePointerByName(XMLElement* pRootEle, const char* strNodeNa
 //    tinyxml2::XMLText* textNode = doc.FirstChildElement( "dictionary" )->FirstChildElement( "character" )->FirstChildElement( "utf8" )->FirstChild()->ToText();
 //    ROS_INFO( "Name of Chinese: %s", textNode->Value() );
 }
-
-
 
 bool Recognize::isOutlinePoint(unsigned char imageBuffer[HEIGHT][WIDTH],int i,int j)
 {
@@ -274,7 +313,7 @@ void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
     }
 }
 
-void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH])
+void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 {
     findPath(image);
     buildNewImageBuffer(image);
