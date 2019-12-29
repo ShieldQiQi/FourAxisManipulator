@@ -66,6 +66,8 @@ geometry_msgs::Point p;
 
 inverseSolutionKiller soluKiller;
 
+XMLDocument doc;
+
 using namespace std;
 
 void draw_bitmap( FT_Bitmap*  bitmap, FT_Int x, FT_Int y)
@@ -246,10 +248,23 @@ void write_callback(const std_msgs::Float64MultiArray angleArray)
 
 void readTextString_callback(std_msgs::String textString)
 {
+    setlocale(LC_ALL,"zh_CN.UTF-8");
+
     x_before = y_before = 0;
     //std_msgs::String  ---->  std::string   ------> std::wstring -------> const wchar_t*
     //ROS_INFO("I heard %s\n",textString.data);
     string testStr(textString.data);
+
+    XMLElement* pRootEle = doc.FirstChildElement("dictionary");
+    XMLElement* destNode;
+    const char* strNodeName = testStr.c_str();
+    bool Error = recognizer.GetNodePointerByName(pRootEle,strNodeName,destNode);
+    if(Error == 0)
+        ROS_ERROR_STREAM("Could not find it...");
+    else {
+        ROS_INFO("Find Chinese %s ",destNode->GetText());
+    }
+
     wstring wstrData;
     wstrData = s2ws(testStr);
     const wchar_t* pWstrData = wstrData.c_str();
@@ -382,9 +397,9 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[11] = (uint8_t)((uint16_t(soluKiller.angleArray[5]/3.14159*180+180)) >> 8);
 //        ser.write(s_buffer,12);
 
-        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f",
-                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
-                soluKiller.angleArray[3]/3.14159*180);
+//        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f",
+//                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
+//                soluKiller.angleArray[3]/3.14159*180);
 
     }else if(axisAngles.data.at(6) == 1 && is_angleArrayUpdated == 1){
         //定义报文头,用于底层判断轴角顺序
@@ -418,6 +433,7 @@ void updateAngles(const ros::TimerEvent& e)
 
 int main (int argc, char** argv)
 {
+    setlocale(LC_ALL,"zh_CN.UTF-8");
     //------------------------------------------------------------------
     //Init the ROS node
     ros::init(argc, argv, "SerialTalker");
@@ -483,8 +499,11 @@ int main (int argc, char** argv)
     {
             ROS_ERROR_STREAM("Serial Port did not open");
     }
-
-//    recognizer.readStrokeOrder();
+    //加载笔画XML文件
+    if(doc.LoadFile( "/home/pi/catkin_qi/src/fam/stroke_data/handwriting-zh_CN-gb2312.xml" ) == 0)
+        ROS_INFO("Load XML succesfully..");
+    else
+        ROS_ERROR_STREAM("Can not find this XML file..");
 
     //------------------------------------------------------------------
     //指定循环的频率

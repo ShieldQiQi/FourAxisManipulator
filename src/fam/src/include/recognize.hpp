@@ -61,38 +61,47 @@ public:
         void sortPointQueue(int i, int j, bool is_firstLayer);
 
         //读取笔画顺序
-        bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement** destNode);
+        bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode);
 	
 private:
 	
 };
 
 
-bool Recognize::GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement** destNode)
+bool Recognize::GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode)
 {
     setlocale(LC_ALL,"zh_CN.UTF-8");
 
     //查找某一汉字,得到对应的笔画数据
     // if equal root node then return
-    if (0 == strcmp(strNodeName, pRootEle->Value()))
-    {
-        *destNode = pRootEle;
-        return true;
+    if(pRootEle->GetText()!=nullptr){
+        if (0 == strcmp(strNodeName, pRootEle->GetText()))
+        {
+//            ROS_INFO("1destination node name: %s\n", pRootEle->GetText());
+            destNode = pRootEle;
+            return true;
+        }
     }
 
     XMLElement* pEle = pRootEle;
     for (pEle = pRootEle->FirstChildElement(); pEle; pEle = pEle->NextSiblingElement())
     {
-        // recursive find sub node return node pointer
-        if (0 != strcmp(pEle->Value(), strNodeName))
-        {
-            GetNodePointerByName(pEle,strNodeName,destNode);
-        }
-        else
-        {
-            *destNode = pEle;
-            ROS_INFO("destination node name: %s\n", pEle->Value());
-            return true;
+        if(pEle->GetText()!=nullptr){
+            // recursive find sub node return node pointer
+            if (0 != strcmp(pEle->GetText(), strNodeName))
+            {
+                if(GetNodePointerByName(pEle,strNodeName,destNode) == true)
+                    return true;
+            }
+            else
+            {
+//                ROS_INFO("2destination node name: %s\n", pEle->GetText());
+                destNode = pEle;
+                return true;
+            }
+        }else {
+            if(GetNodePointerByName(pEle,strNodeName,destNode) == true)
+                return true;
         }
     }
 
