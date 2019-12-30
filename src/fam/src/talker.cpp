@@ -29,7 +29,6 @@
 
 #define WIDTH   1000
 #define HEIGHT  150
-/* origin is the upper left corner */
 unsigned char image[HEIGHT][WIDTH];
 unsigned char imageBuffer[HEIGHT][WIDTH];
 std_msgs::Float64MultiArray axisAngles;
@@ -62,6 +61,7 @@ serial::Serial ser; //声明串口对象
 visualization_msgs::Marker points;
 visualization_msgs::Marker pointWork;
 visualization_msgs::Marker pointIdeal;
+visualization_msgs::Marker pointMaster;
 geometry_msgs::Point p;
 
 inverseSolutionKiller soluKiller;
@@ -121,7 +121,7 @@ std::wstring s2ws(const std::string& s)
 
 //---------------------------------------------------
 //更新文字在RVIZ中的显示
-void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointWork)
+void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointWork,visualization_msgs::Marker &pointMaster)
 {
     setlocale(LC_ALL,"zh_CN.UTF-8");
 
@@ -130,6 +130,7 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     travelQueue.ClearQueue();
     travelQueueIdeal.ClearQueue();
     pointWork.points.clear();
+    pointMaster.points.clear();
     pointIdeal.points.clear();
 
     points.header.frame_id  = "/textFrame";
@@ -145,6 +146,20 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     // Points are green
     points.color.b = 1.0f;
     points.color.a = 1.0;
+
+    pointMaster.header.frame_id  = "/textFrame";
+    pointMaster.header.stamp = ros::Time::now();
+    pointMaster.ns = "textPoints4";
+    pointMaster.action = visualization_msgs::Marker::ADD;
+    pointMaster.pose.orientation.w = 1.0;
+    pointMaster.id = 0;
+    pointMaster.type = visualization_msgs::Marker::POINTS;
+    // POINTS markers use x and y scale for width/height respectively
+    pointMaster.scale.x = 0.0256;
+    pointMaster.scale.y = 0.0256;
+    // Points are green
+    pointMaster.color.r = 1.0f;
+    pointMaster.color.a = 1.0;
 
     pointWork.header.frame_id  = "/textFrame";
     pointWork.header.stamp = ros::Time::now();
@@ -176,15 +191,30 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     recognizer.Analyse(image,0);
     recognizer.pointQueue.Assignment(travelQueue,travelQueueIdeal);
 
-    Node<Stroke>* pStrokeNode = recognizer.strokeQueue.phead->next;
-    for (;pStrokeNode !=nullptr;pStrokeNode = pStrokeNode->next) {
-        ROS_INFO("num %d:the stroke is '%s' which have %d point(s)",pStrokeNode->value.orderNum,pStrokeNode->value.strokeName,pStrokeNode->value.strokePointNum);
-        Node<Point>* pPointNode = pStrokeNode->value.strokePointQueue.phead->next;
+//    Node<Stroke>* pStrokeNode = recognizer.strokeQueue.phead->next;
+//    for (;pStrokeNode !=nullptr;pStrokeNode = pStrokeNode->next) {
+//        ROS_INFO("num %d:the stroke is '%s' which have %d point(s)",pStrokeNode->value.orderNum,pStrokeNode->value.strokeName,pStrokeNode->value.strokePointNum);
+//        Node<Point>* pPointNode = pStrokeNode->value.strokePointQueue.phead->next;
 
-        for (;pPointNode!=nullptr;pPointNode = pPointNode->next) {
-            ROS_INFO("   the point(s) are x = %d y = %d",pPointNode->value.x,pPointNode->value.y);
+//        for (;pPointNode!=nullptr;pPointNode = pPointNode->next) {
+//            ROS_INFO("   the point(s) are x = %d y = %d",pPointNode->value.x,pPointNode->value.y);
+//        }
+//    }
+    while (recognizer.strokeQueue.phead->next) {
+        ROS_INFO("num %d:the stroke is '%s' which have %d point(s)",
+                 recognizer.strokeQueue.phead->next->value.orderNum,recognizer.strokeQueue.phead->next->value.strokeName,recognizer.strokeQueue.phead->next->value.strokePointNum);
+        while (recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next) {
+            ROS_INFO("     the point(s) are x = %d y = %d",recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.x,
+                     recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.y);
+            p.x = 0.0025*recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.x;
+            p.y = 0.0025*recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.y;
+            pointMaster.points.push_back(p);
+
+            recognizer.strokeQueue.phead->next->value.strokePointQueue.pop();
         }
+        recognizer.strokeQueue.pop();
     }
+
 
 //    ROS_INFO("-------------------------------------------\nThere are %d point in travelQueueIdeal"
 //             ,travelQueueIdeal.getSize());
@@ -310,7 +340,7 @@ void readTextString_callback(std_msgs::String textString)
     //show_image();
     //getOutline();
     imageBinarization();
-    updatePoints(points,pointWork);
+    updatePoints(points,pointWork,pointMaster);
 
     pen.x = 15 * 64;
     pen.y = ( target_height - 100 ) * 64;
@@ -537,6 +567,8 @@ int main (int argc, char** argv)
             marker_pub.publish(pointWork);
         }else if (index ==45) {
             marker_pub.publish(pointIdeal);
+        }else if (index ==60) {
+            marker_pub.publish(pointMaster);
             index = 0;
         }
         index++;

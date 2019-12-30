@@ -88,23 +88,30 @@ bool Recognize::GetStrokeMsg(XMLElement* destNode)
     XMLElement* pEleDeeper;
     int strokecount = 0;
     int pointcount = 0;
+
+    for(pEle = destNode->NextSiblingElement()->FirstChildElement();pEle;pEle = pEle->NextSiblingElement())
+    {
+        Stroke strokeTemp;
+        strokeQueue.push(strokeTemp);
+    }
+
+    Node<Stroke>* pStroke =  strokeQueue.phead->next;
+
     for(pEle = destNode->NextSiblingElement()->FirstChildElement();pEle;pEle = pEle->NextSiblingElement())
     {
         Point pointTemp;
-        Stroke strokeTemp;
 
         for(pointcount = 0,pEleDeeper = pEle->FirstChildElement();pEleDeeper;pEleDeeper = pEleDeeper->NextSiblingElement())
         {
             pointTemp.x = atoi(pEleDeeper->Attribute("x"));
             pointTemp.y = atoi(pEleDeeper->Attribute("y"));
-            strokeTemp.strokePointQueue.push(pointTemp);
+            pStroke->value.strokePointQueue.push(pointTemp);
             pointcount++;
         }
-        strokeTemp.orderNum = strokecount+1;
-        strokeTemp.strokePointNum = pointcount;
-        strokeQueue.push(strokeTemp);
-        ROS_INFO("%d",strokeQueue.phead->next->value.strokePointQueue.phead->next == nullptr);
-
+        pStroke->value.strokeName = "竖";
+        pStroke->value.orderNum = strokecount+1;
+        pStroke->value.strokePointNum = pointcount;
+        pStroke = pStroke->next;
         strokecount++;
     }
 }
