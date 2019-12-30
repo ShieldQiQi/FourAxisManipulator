@@ -32,14 +32,51 @@ struct Point
 };
 
 /* @Parama defination
- * which stroke is
+ * which stroke is (stroke name)
+ * ----------------------------------------------------
+ * 横: -->右
+ * 竖: -->下
+ * 点: -->右下
+ * 提: -->右上
+ *
+ * 撇: -->左下-->左下
+ * 撇点: -->左下-->右下
+ * 撇折: -->左下-->右(右上)
+ *
+ * 竖提: -->下-->右上
+ * 竖弯: -->下-->右
+ * 竖钩: -->下-->左上
+ * 竖折: -->下-->右
+ * 竖弯钩: -->下-->右-->上
+ * 竖折撇: -->下-->右-->左下
+ * 竖折折: -->下-->右-->下
+ * 竖折折钩: -->下-->右-->左下-->上
+ *
+ * 捺: -->右下-->右下
+ * 横撇: -->右-->左下-->左下
+ * 横勾: -->右-->左下
+ * 横折: -->右-->下
+ * 斜钩: -->右下-->右下-->右下-->上
+ * 弯钩: -->右下-->下-->下-->上
+ * 卧钩: -->右下-->右下-->左上
+ * 横斜钩: -->右-->下-->右下-->上
+ * 横折提: -->右上-->下-->右上
+ * 横折弯: -->右-->下-->右
+ * 横折钩: -->右-->下-->左上
+ * 横折折: -->右-->下-->右
+ * 横撇弯钩: -->右-->左下-->右下-->左上
+ * 横折弯钩: -->右-->下-->右-->上
+ * 横折折撇: -->右-->左下-->右-->左下
+ * 横折折折: -->右-->下-->右-->下
+ * 横折折折钩: -->右-->左下-->右-->左下-->上
+ * ----------------------------------------------------
  * the order num of the stroke in current Chinese
  * how many point in this stroke
  * the points queue in this stroke which include X and Y data message..
  */
 struct Stroke
 {
-    char*               strokeName="横";
+    char*               strokeName="未知";
     uint8_t             orderNum;
     int                 strokePointNum;
     LinkQueue<Point>    strokePointQueue;
@@ -108,7 +145,114 @@ bool Recognize::GetStrokeMsg(XMLElement* destNode)
             pStroke->value.strokePointQueue.push(pointTemp);
             pointcount++;
         }
-        pStroke->value.strokeName = "竖";
+        Node<Point>* pPoint =  pStroke->value.strokePointQueue.phead->next;
+        //先判断两个点的笔画\有4个
+        if (pointcount == 2) {
+            if(1.0*abs(pPoint->value.x-pPoint->next->value.x)/abs(pPoint->value.y-pPoint->next->value.y) < 0.4){
+                pStroke->value.strokeName = "竖";
+            }else if(1.0*abs(pPoint->value.x-pPoint->next->value.x)/abs(pPoint->value.y-pPoint->next->value.y) > 2.5){
+                pStroke->value.strokeName = "横";
+            }else if (pPoint->value.y-pPoint->next->value.y > 0) {
+                pStroke->value.strokeName = "提";
+            }else{
+                pStroke->value.strokeName = "点";
+            }
+        }//再依据方向判断剩下的笔画
+        else if(pPoint->value.x-pPoint->next->value.x > 0 && 1.0*abs(pPoint->value.x-pPoint->next->value.x)/abs(pPoint->value.y-pPoint->next->value.y) > 0.15){
+            //第一次向左下走\可能为撇\撇点\撇折
+            if(pPoint->next->value.x-pPoint->next->next->value.x > 0){
+                pStroke->value.strokeName = "撇";
+            }else if(pPoint->next->value.y-pPoint->next->next->value.y > 0){
+                if(pointcount == 3){
+                    pStroke->value.strokeName = "撇折";
+                }else if(pointcount == 4) {
+                    pStroke->value.strokeName = "竖折撇";
+                }else{
+                    pStroke->value.strokeName = "竖折折钩";
+                }
+            }else {
+                pStroke->value.strokeName = "撇点";
+            }
+        }//可能为 竖提\竖弯\竖钩\竖折\竖弯钩\竖折撇\竖折折\竖折折钩
+        else if(1.0*abs(pPoint->value.x-pPoint->next->value.x)/abs(pPoint->value.y-pPoint->next->value.y) < 0.15) {
+            if(pointcount == 3){
+                if(pPoint->next->value.x-pPoint->next->next->value.x > 0 && pPoint->next->value.y-pPoint->next->next->value.y > 0){
+                    pStroke->value.strokeName = "竖钩";
+                }else if (pPoint->next->value.x-pPoint->next->next->value.x < 0 && 1.0*abs(pPoint->next->next->value.x-pPoint->next->value.x)/abs(pPoint->next->next->value.y-pPoint->next->value.y) < 1.5) {
+                    pStroke->value.strokeName = "竖提";
+                }else if(pPoint->next->value.x-pPoint->next->next->value.x < 0){
+                    pStroke->value.strokeName = "竖折";
+                }else {
+                    pStroke->value.strokeName = "竖撇";
+                }
+            }else if(pointcount == 4){
+                if((1.0*abs(pPoint->next->next->value.x-pPoint->next->next->next->value.x)/abs(pPoint->next->next->value.y-pPoint->next->next->next->value.y) < 0.3)){
+                    pStroke->value.strokeName = "竖折折";
+                }else{
+                    pStroke->value.strokeName = "竖弯";
+                }
+            }else{
+                if(pPoint->next->value.x-pPoint->next->next->value.x > 0){
+                    pStroke->value.strokeName = "竖撇";
+                }else if(pPoint->next->next->value.x-pPoint->next->next->next->value.x > 0){
+                    pStroke->value.strokeName = "竖折折钩";
+                }else {
+                    pStroke->value.strokeName = "竖弯钩";
+                }
+            }
+        }else if(1.0*abs(pPoint->value.x-pPoint->next->value.x)/abs(pPoint->value.y-pPoint->next->value.y) < 2){
+            if(pointcount == 3 || pointcount == 4){
+                pStroke->value.strokeName = "捺";
+            }else if(pPoint->next->next->next->value.x-pPoint->next->next->value.x < 0){
+                pStroke->value.strokeName = "弯钩";
+            }else if(pPoint->next->next->next->value.y-pPoint->next->next->value.y < 0){
+                pStroke->value.strokeName = "卧钩";
+            }else{
+                pStroke->value.strokeName = "斜钩";
+            }
+        }else if(1.0*abs(pPoint->value.x-pPoint->next->value.x)/abs(pPoint->value.y-pPoint->next->value.y) > 2) {
+            if(pointcount == 3){
+                if(1.0*abs(pPoint->next->value.x-pPoint->next->next->value.x)/abs(pPoint->next->value.y-pPoint->next->next->value.y) < 0.7){
+                    pStroke->value.strokeName = "横折";
+                }else{
+                    pStroke->value.strokeName = "横钩";
+                }
+            }else if(pPoint->next->value.x-pPoint->next->next->value.x > 0 && pPoint->next->next->value.x-pPoint->next->next->next->value.x > 0
+                     && pPoint->next->next->value.y-pPoint->next->next->next->value.y < 0){
+                pStroke->value.strokeName = "横撇";
+            }else if(pointcount == 4){
+                if(pPoint->next->next->value.x-pPoint->next->next->next->value.x > 0){
+                    pStroke->value.strokeName = "横折钩";
+                }else if (abs(pPoint->next->next->value.x-pPoint->next->next->next->value.x)/abs(pPoint->next->next->value.y-pPoint->next->next->next->value.y) > 1.8) {
+                    pStroke->value.strokeName = "横折折";
+                }else{
+                    pStroke->value.strokeName = "横折提";
+                }
+            }else if(pointcount == 5){
+                if(pPoint->next->next->next->value.x-pPoint->next->next->next->next->value.x > 0){
+                    if(pPoint->next->next->next->value.x-pPoint->next->next->next->next->value.x < 0){
+                        pStroke->value.strokeName = "横折折折";
+                    }else {
+                        pStroke->value.strokeName = "横撇弯钩";
+                    }
+                }else{
+                    pStroke->value.strokeName = "横折弯";
+                }
+            }else if(pointcount == 6){
+                if(pPoint->next->next->next->value.x-pPoint->next->next->next->next->value.x > 0){
+                    if(pPoint->next->next->next->next->value.y-pPoint->next->next->next->next->next->value.y > 0){
+                        pStroke->value.strokeName = "横折折折钩";
+                    }else {
+                        pStroke->value.strokeName = "横折折撇";
+                    }
+                }else if(pPoint->next->next->next->value.y-pPoint->next->next->next->next->value.y > 0){
+                    pStroke->value.strokeName = "横折弯钩";
+                }else {
+                    pStroke->value.strokeName = "横斜钩";
+                }
+            }
+        }
+
         pStroke->value.orderNum = strokecount+1;
         pStroke->value.strokePointNum = pointcount;
         pStroke = pStroke->next;

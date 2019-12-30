@@ -206,8 +206,8 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
         while (recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next) {
             ROS_INFO("     the point(s) are x = %d y = %d",recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.x,
                      recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.y);
-            p.x = 0.0025*recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.x;
-            p.y = 0.0025*recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.y;
+            p.y = 0.002*recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.x;
+            p.x = 0.002*recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.y;
             pointMaster.points.push_back(p);
 
             recognizer.strokeQueue.phead->next->value.strokePointQueue.pop();
