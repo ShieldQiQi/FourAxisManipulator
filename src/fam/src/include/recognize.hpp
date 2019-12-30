@@ -108,6 +108,7 @@ public:
         void buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH]);
         //按照汉字笔画,给点队列排序构成路径
         void sortPointQueue(int i, int j, bool is_firstLayer);
+        void sortPointQueueByXML();
         //读取笔画顺序
         bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode);
         bool GetStrokeMsg(XMLElement* destNode);
@@ -464,6 +465,11 @@ void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
     }
 }
 
+void Recognize::sortPointQueueByXML()
+{
+
+}
+
 void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 {
     findPath(image);
@@ -478,11 +484,15 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
     }
 
     //from up to bottom and from left to right to travelse
-    for (int j =0;j < HEIGHT;j++)
-    {
-        for(int i = 0; i < WIDTH; i++)
+    if(is_UseXML){
+        sortPointQueueByXML();
+    }else {
+        for (int j =0;j < HEIGHT;j++)
         {
-            sortPointQueue(i,j,1);
+            for(int i = 0; i < WIDTH; i++)
+            {
+                sortPointQueue(i,j,1);
+            }
         }
     }
 }
