@@ -23,6 +23,10 @@ sqlite3.h
 -
 stdlib.h
 -
+map
+-
+vector
+-
 
 /home/pi/catkin_qi/src/fam/src/./include/tinyxml2.hpp
 ctype.h

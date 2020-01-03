@@ -184,37 +184,12 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     // POINTS markers use x and y scale for width/height respectively
     pointIdeal.scale.x = 0.0032;
     pointIdeal.scale.y = 0.0032;
+    pointIdeal.color.r = 1.0f;
     pointIdeal.color.g = 1.0f;
-    pointIdeal.color.r = 1.0;
     pointIdeal.color.a = 1.0f;
 
-    recognizer.Analyse(image,0);
+    recognizer.Analyse(image,1);
     recognizer.pointQueue.Assignment(travelQueue,travelQueueIdeal);
-
-//    Node<Stroke>* pStrokeNode = recognizer.strokeQueue.phead->next;
-//    for (;pStrokeNode !=nullptr;pStrokeNode = pStrokeNode->next) {
-//        ROS_INFO("num %d:the stroke is '%s' which have %d point(s)",pStrokeNode->value.orderNum,pStrokeNode->value.strokeName,pStrokeNode->value.strokePointNum);
-//        Node<Point>* pPointNode = pStrokeNode->value.strokePointQueue.phead->next;
-
-//        for (;pPointNode!=nullptr;pPointNode = pPointNode->next) {
-//            ROS_INFO("   the point(s) are x = %d y = %d",pPointNode->value.x,pPointNode->value.y);
-//        }
-//    }
-    while (recognizer.strokeQueue.phead->next) {
-        ROS_INFO("num %d:the stroke is '%s' which have %d point(s)",
-                 recognizer.strokeQueue.phead->next->value.orderNum,recognizer.strokeQueue.phead->next->value.strokeName,recognizer.strokeQueue.phead->next->value.strokePointNum);
-        while (recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next) {
-//            ROS_INFO("     the point(s) are x = %d y = %d",recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.x,
-//                     recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.y);
-            p.y = 0.002*recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.x;
-            p.x = 0.002*recognizer.strokeQueue.phead->next->value.strokePointQueue.phead->next->value.y;
-            pointMaster.points.push_back(p);
-
-            recognizer.strokeQueue.phead->next->value.strokePointQueue.pop();
-        }
-        recognizer.strokeQueue.pop();
-    }
-
 
 //    ROS_INFO("-------------------------------------------\nThere are %d point in travelQueueIdeal"
 //             ,travelQueueIdeal.getSize());
@@ -287,7 +262,6 @@ void write_callback(const std_msgs::Float64MultiArray angleArray)
         axisAngles.data.at(5) =  angleArray.data.at(5);
         axisAngles.data.at(6) =  angleArray.data.at(6);
 }
-
 
 void readTextString_callback(std_msgs::String textString)
 {

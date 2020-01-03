@@ -11,6 +11,8 @@
 #include "tinyxml2.hpp"
 #include <sqlite3.h>
 #include <stdlib.h>
+#include <map>
+#include <vector>
 
 using namespace tinyxml2;
 
@@ -76,7 +78,7 @@ struct Point
  */
 struct Stroke
 {
-    char*               strokeName="未知";
+    const char*               strokeName="未知";
     uint8_t             orderNum;
     int                 strokePointNum;
     LinkQueue<Point>    strokePointQueue;
@@ -93,10 +95,15 @@ public:
 	Recognize();
 	~Recognize();
 
+        map<const char*,uint8_t> strokeMap;
+
         //构造点缓存队列
         LinkQueue<Point> pointQueue;
         //笔画队列
         LinkQueue<Stroke> strokeQueue;
+
+        vector<uint8_t> strokeNumberArray;
+        vector<uint8_t> serveStrokeNumberArray;
 
         void Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML);
         unsigned char imageTemp[HEIGHT][WIDTH];
@@ -108,7 +115,7 @@ public:
         void buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH]);
         //按照汉字笔画,给点队列排序构成路径
         void sortPointQueue(int i, int j, bool is_firstLayer);
-        void sortPointQueueByXML();
+        void sortPointQueueByXML(const char* strokeName);
         //读取笔画顺序
         bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode);
         bool GetStrokeMsg(XMLElement* destNode);
@@ -465,11 +472,10 @@ void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
     }
 }
 
-void Recognize::sortPointQueueByXML()
+void Recognize::sortPointQueueByXML(const char *strokeName)
 {
-
+    ROS_INFO("%s",strokeName);
 }
-
 void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 {
     findPath(image);
@@ -485,7 +491,40 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 
     //from up to bottom and from left to right to travelse
     if(is_UseXML){
-        sortPointQueueByXML();
+        //排序前对笔画按照复杂到简单的排序
+        while (strokeQueue.phead->next) {
+            ROS_INFO("num %d:the stroke is '%s' which have %d point(s) the stroke number is %d",
+                     strokeQueue.phead->next->value.orderNum,strokeQueue.phead->next->value.strokeName,strokeQueue.phead->next->value.strokePointNum
+                     ,strokeMap[(char*)strokeQueue.phead->next->value.strokeName]);
+            strokeNumberArray.push_back(strokeMap[(char*)strokeQueue.phead->next->value.strokeName]);
+            serveStrokeNumberArray.push_back(strokeMap[(char*)strokeQueue.phead->next->value.strokeName]);
+            strokeQueue.pop();
+        }
+        for (int i = 0,temp = 0;i<serveStrokeNumberArray.size();i++) {
+            temp = serveStrokeNumberArray[i];
+            for (int j =i;j<serveStrokeNumberArray.size();j++) {
+                if(temp < serveStrokeNumberArray[j]){
+                    serveStrokeNumberArray[i] = serveStrokeNumberArray[j];
+                    serveStrokeNumberArray[j] = temp;
+                    temp = serveStrokeNumberArray[i];
+                }
+            }
+        }
+
+        Node<Stroke> *pStroke = strokeQueue.phead->next;
+        //按照笔画复杂程度顺序分别在点数组中匹配相应的笔画
+        for (int i = 0;i<serveStrokeNumberArray.size();i++) {
+
+            for(map<const char*,uint8_t>::iterator it = strokeMap.begin();it!=strokeMap.end();it++)
+            {
+                if(it->second==serveStrokeNumberArray[i])
+                    sortPointQueueByXML(it->first);
+            }
+        }
+
+        serveStrokeNumberArray.clear();
+        strokeNumberArray.clear();
+        strokeQueue.ClearQueue();
     }else {
         for (int j =0;j < HEIGHT;j++)
         {
@@ -499,7 +538,44 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 
 Recognize::Recognize()
 {
+    strokeMap["点"] = 0;
+    strokeMap["提"] = 1;
+    strokeMap["横"] = 2;
+    strokeMap["竖"] = 3;
+    strokeMap["撇"] = 4;
+    strokeMap["捺"] = 5;
 
+    strokeMap["横勾"] = 6;
+    strokeMap["横撇"] = 7;
+    strokeMap["横折"] = 8;
+    strokeMap["撇点"] = 9;
+    strokeMap["撇折"] = 10;
+    strokeMap["竖提"] = 11;
+    strokeMap["竖弯"] = 12;
+    strokeMap["竖钩"] = 13;
+    strokeMap["竖折"] = 14;
+
+    strokeMap["斜钩"] = 15;
+    strokeMap["弯钩"] = 16;
+    strokeMap["卧钩"] = 17;
+
+    strokeMap["竖弯钩"] = 18;
+    strokeMap["竖折撇"] = 19;
+    strokeMap["竖折折"] = 20;
+
+    strokeMap["横斜钩"] = 21;
+    strokeMap["横折提"] = 22;
+    strokeMap["横折弯"] = 23;
+    strokeMap["横折钩"] = 24;
+    strokeMap["横折折"] = 25;
+
+
+    strokeMap["横撇弯钩"] = 26;
+    strokeMap["横折弯钩"] = 27;
+    strokeMap["横折折撇"] = 28;
+    strokeMap["横折折折"] = 29;
+    strokeMap["竖折折钩"] = 30;
+    strokeMap["横折折折钩"] = 31;
 }
 
 Recognize::~Recognize()
