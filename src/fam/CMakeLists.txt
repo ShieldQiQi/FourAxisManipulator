@@ -43,8 +43,8 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 # Freetype 文字引擎需要额外添加头文件和动态库目录
 include_directories(include /usr/local/include/freetype2)
+include_directories(include /usr/local/include/opencv2)
 link_directories(/usr/local/lib/)
-#~add_executable(tinyxml src/tinyxml2.cpp)
 add_executable(talker src/talker.cpp)
 target_link_libraries(talker ${catkin_LIBRARIES})
 
@@ -58,4 +58,8 @@ add_dependencies(talker beginner_tutorials_generate_messages_cpp)
 
 #指定（FreeType）第三方动态链接库需要将链接放在  add_executable 之后
 target_link_libraries(talker /usr/local/lib/libfreetype.so)
+target_link_libraries(talker /usr/local/lib/libopencv_core.so)
+target_link_libraries(talker /usr/local/lib/libopencv_highgui.so)
+target_link_libraries(talker /usr/local/lib/libopencv_imgcodecs.so)
+target_link_libraries(talker /usr/local/lib/libopencv_imgproc.so)
 #~target_link_libraries(talker /usr/local/lib/libtinyxml2.a)

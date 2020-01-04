@@ -25,6 +25,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/local/include"
   "/usr/include/eigen3"
   "/usr/local/include/freetype2"
+  "/usr/local/include/opencv2"
   )
 
 # Targets to which this target links.

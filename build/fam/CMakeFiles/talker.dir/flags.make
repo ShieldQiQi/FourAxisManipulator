@@ -6,5 +6,5 @@ CXX_FLAGS =
 
 CXX_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"fam\"
 
-CXX_INCLUDES = -I/home/pi/catkin_qi/devel/include -I/home/pi/catkin_qi/src/fam/include -I/home/pi/catkin_qi/src/serial/include -I/opt/ros/kinetic/include -I/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/local/include -I/usr/include/eigen3 -I/usr/local/include/freetype2 
+CXX_INCLUDES = -I/home/pi/catkin_qi/devel/include -I/home/pi/catkin_qi/src/fam/include -I/home/pi/catkin_qi/src/serial/include -I/opt/ros/kinetic/include -I/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/usr/local/include -I/usr/include/eigen3 -I/usr/local/include/freetype2 -I/usr/local/include/opencv2 
 

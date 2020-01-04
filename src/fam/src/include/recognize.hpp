@@ -13,8 +13,65 @@
 #include <stdlib.h>
 #include <map>
 #include <vector>
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
 
 using namespace tinyxml2;
+
+/*
+ * use opencv to recognize stroke
+ */
+bool use_mask;
+cv::Mat img;cv::Mat templ;cv::Mat mask;cv::Mat result;
+const char* image_window = "Source Image";
+const char* result_window = "Result window";
+int match_method;
+int max_Trackbar = 5;
+
+void MatchingMethod( int, void* )
+{
+    double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+    cv::Mat img_display;
+    img.copyTo( img_display );
+    int result_cols =  img.cols - templ.cols + 1;
+    int result_rows = img.rows - templ.rows + 1;
+
+    result.create( result_rows, result_cols, CV_32FC1 );
+    bool method_accepts_mask = (cv::TM_SQDIFF == match_method || match_method == cv::TM_CCORR_NORMED);
+
+    if (use_mask && method_accepts_mask)
+    {
+        cv::matchTemplate( img, templ, result, match_method, mask);
+    }else
+    {
+        cv::matchTemplate( img, templ, result, match_method);
+    }
+
+    cv::normalize( result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat() );
+
+    cv::Point matchLoc;
+    cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+
+    if( match_method  == cv::TM_SQDIFF || match_method == cv::TM_SQDIFF_NORMED )
+    {
+        matchLoc = minLoc;
+    }else
+    {
+        matchLoc = maxLoc;
+    }
+
+    cv::rectangle( img_display, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
+    cv::rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
+
+    cv::imshow( image_window, img_display );
+    cv::imshow( result_window, result );
+
+    vector<int> compression_params;
+    compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+    cv::imwrite("./image/result.png",result,compression_params);
+}
 
 /* @Parama defination
  * The point's 'X' position
@@ -119,11 +176,25 @@ public:
         //读取笔画顺序
         bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode);
         bool GetStrokeMsg(XMLElement* destNode);
+
+        void strokeRecognize();
 	
 private:
 	
 };
+void Recognize::strokeRecognize()
+{
+    img = cv::imread( "./image/origin.png", cv::IMREAD_UNCHANGED );
+    templ = cv::imread( "./image/part.png", cv::IMREAD_UNCHANGED );
 
+    cv::namedWindow( image_window, cv::WINDOW_AUTOSIZE );
+    cv::namedWindow( result_window, cv::WINDOW_AUTOSIZE );
+
+    const char* trackbar_label = "Method: \n 0: SQDIFF \n 1: SQDIFF NORMED \n 2: TM CCORR \n 3: TM CCORR NORMED \n 4: TM COEFF \n 5: TM COEFF NORMED";
+    cv::createTrackbar( trackbar_label, image_window, &match_method, max_Trackbar, MatchingMethod );
+    MatchingMethod( 0, 0 );
+    cv::waitKey(30);
+}
 
 bool Recognize::GetStrokeMsg(XMLElement* destNode)
 {
@@ -474,10 +545,13 @@ void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
 
 void Recognize::sortPointQueueByXML(const char *strokeName)
 {
+
     ROS_INFO("%s",strokeName);
 }
 void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 {
+    strokeRecognize();
+
     findPath(image);
     buildNewImageBuffer(image);
     for (int j =0;j < HEIGHT;j++)

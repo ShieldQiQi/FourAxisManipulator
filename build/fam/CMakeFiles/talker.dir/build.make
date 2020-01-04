@@ -120,6 +120,10 @@ talker_EXTERNAL_OBJECTS =
 /home/pi/catkin_qi/devel/lib/fam/talker: /usr/lib/arm-linux-gnueabihf/libboost_atomic.so
 /home/pi/catkin_qi/devel/lib/fam/talker: /usr/lib/arm-linux-gnueabihf/libconsole_bridge.so.0.4
 /home/pi/catkin_qi/devel/lib/fam/talker: /usr/local/lib/libfreetype.so
+/home/pi/catkin_qi/devel/lib/fam/talker: /usr/local/lib/libopencv_core.so
+/home/pi/catkin_qi/devel/lib/fam/talker: /usr/local/lib/libopencv_highgui.so
+/home/pi/catkin_qi/devel/lib/fam/talker: /usr/local/lib/libopencv_imgcodecs.so
+/home/pi/catkin_qi/devel/lib/fam/talker: /usr/local/lib/libopencv_imgproc.so
 /home/pi/catkin_qi/devel/lib/fam/talker: fam/CMakeFiles/talker.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/pi/catkin_qi/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable /home/pi/catkin_qi/devel/lib/fam/talker"
 	cd /home/pi/catkin_qi/build/fam && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/talker.dir/link.txt --verbose=$(VERBOSE)
