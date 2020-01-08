@@ -6,8 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/pi/catkin_qi/build/qt_ros/qt_tutorials/qadd_client/moc_qadd.cxx
-
 /home/pi/catkin_qi/devel/include/qt_tutorials/TwoInts.h
 ros/service_traits.h
 -

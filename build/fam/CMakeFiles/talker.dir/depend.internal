@@ -1464,6 +1464,8 @@ fam/CMakeFiles/talker.dir/src/talker.cpp.o
  /usr/local/include/opencv2/imgproc.hpp
  /usr/local/include/opencv2/imgproc/imgproc_c.h
  /usr/local/include/opencv2/imgproc/types_c.h
+ /usr/local/include/opencv2/line_descriptor.hpp
+ /usr/local/include/opencv2/line_descriptor/descriptor.hpp
  /usr/local/include/opencv2/ml.hpp
  /usr/local/include/opencv2/ml/ml.inl.hpp
  /usr/local/include/opencv2/objdetect.hpp
@@ -1513,4 +1515,7 @@ fam/CMakeFiles/talker.dir/src/talker.cpp.o
  /usr/local/include/opencv2/videostab/ring_buffer.hpp
  /usr/local/include/opencv2/videostab/stabilizer.hpp
  /usr/local/include/opencv2/videostab/wobble_suppression.hpp
+ /usr/local/include/opencv2/xfeatures2d.hpp
+ /usr/local/include/opencv2/xfeatures2d/cuda.hpp
+ /usr/local/include/opencv2/xfeatures2d/nonfree.hpp
  /usr/local/include/sqlite3.h

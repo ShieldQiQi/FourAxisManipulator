@@ -39,7 +39,7 @@ Visualization Manager:
     - Alpha: 0.5
       Cell Size: 1
       Class: rviz/Grid
-      Color: 160; 160; 164
+      Color: 80; 80; 80
       Enabled: true
       Line Style:
         Line Width: 0.029999999329447746

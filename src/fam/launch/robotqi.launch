@@ -19,5 +19,5 @@
   <node
     name="qtui"
     pkg="qtui"
-    type="qtui" />
+    type="qtui"/>
 </launch>

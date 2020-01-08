@@ -13,64 +13,88 @@
 #include <stdlib.h>
 #include <map>
 #include <vector>
+#include "opencv2/core.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
+#include <opencv2/opencv.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/xfeatures2d.hpp>
+#include <opencv2/opencv_modules.hpp>
+#include <opencv2/line_descriptor.hpp>
+#include <opencv2/core/utility.hpp>
 
 using namespace tinyxml2;
-
+using namespace cv::xfeatures2d;
+using namespace cv::line_descriptor;
 /*
  * use opencv to recognize stroke
  */
-bool use_mask;
-cv::Mat img;cv::Mat templ;cv::Mat mask;cv::Mat result;
+
+cv::Mat img;cv::Mat templ;
 const char* image_window = "Source Image";
 const char* result_window = "Result window";
-int match_method;
-int max_Trackbar = 5;
+const char* compare_window = "compare window";
+int lsdNFeatures = 120;
+//bool use_mask;
+//cv::Mat img;cv::Mat templ;cv::Mat mask;cv::Mat result;
+//const char* image_window = "Source Image";
+//const char* result_window = "Result window";
+//int match_method;
+//int max_Trackbar = 5;
+
+struct sort_descriptor_by_queryIdx
+{
+    inline bool operator()(const vector<cv::DMatch>& a, const vector<cv::DMatch>& b){
+        return ( a[0].queryIdx < b[0].queryIdx );
+    }
+};
+struct sort_lines_by_response
+{
+    inline bool operator()(const KeyLine& a, const KeyLine& b){
+        return ( a.response > b.response );
+    }
+};
 
 void MatchingMethod( int, void* )
 {
-    double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
-    cv::Mat img_display;
-    img.copyTo( img_display );
-    int result_cols =  img.cols - templ.cols + 1;
-    int result_rows = img.rows - templ.rows + 1;
+//    double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+//    cv::Mat img_display;
+//    img.copyTo( img_display );
+//    int result_cols =  img.cols - templ.cols + 1;
+//    int result_rows = img.rows - templ.rows + 1;
 
-    result.create( result_rows, result_cols, CV_32FC1 );
-    bool method_accepts_mask = (cv::TM_SQDIFF == match_method || match_method == cv::TM_CCORR_NORMED);
+//    result.create( result_rows, result_cols, CV_32FC2 );
+//    //只有以下两种方式具有掩码
+//    bool method_accepts_mask = (cv::TM_SQDIFF == match_method || match_method == cv::TM_CCORR_NORMED);
 
-    if (use_mask && method_accepts_mask)
-    {
-        cv::matchTemplate( img, templ, result, match_method, mask);
-    }else
-    {
-        cv::matchTemplate( img, templ, result, match_method);
-    }
+//    if (use_mask && method_accepts_mask)
+//    {
+//        ( img, templ, result, match_method, mask);
+//    }else
+//    {
+//        cv::matchTemplate( img, templ, result, match_method);
+//    }
 
-    cv::normalize( result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat() );
+//    //归一化数据
+//    cv::normalize( result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat() );
 
-    cv::Point matchLoc;
-    cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+//    cv::Point matchLoc;
+//    cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
 
-    if( match_method  == cv::TM_SQDIFF || match_method == cv::TM_SQDIFF_NORMED )
-    {
-        matchLoc = minLoc;
-    }else
-    {
-        matchLoc = maxLoc;
-    }
+//    if( match_method  == cv::TM_SQDIFF || match_method == cv::TM_SQDIFF_NORMED )
+//    {
+//        matchLoc = minLoc;
+//    }else
+//    {
+//        matchLoc = maxLoc;
+//    }
 
-    cv::rectangle( img_display, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
-    cv::rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
+//    cv::rectangle( img_display, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
+//    cv::rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
 
-    cv::imshow( image_window, img_display );
-    cv::imshow( result_window, result );
-
-    vector<int> compression_params;
-    compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
-    compression_params.push_back(9);
-    cv::imwrite("./image/result.png",result,compression_params);
+//    cv::imshow( image_window, img_display );
+//    cv::imshow( result_window, result );
 }
 
 /* @Parama defination
@@ -135,10 +159,18 @@ struct Point
  */
 struct Stroke
 {
-    const char*               strokeName="未知";
+    const char*         strokeName="未知";
     uint8_t             orderNum;
     int                 strokePointNum;
     LinkQueue<Point>    strokePointQueue;
+};
+
+struct Mask
+{
+    uint8_t x_length = 6;
+    uint8_t y_length = 6;
+    uint8_t maskType = 0;
+    uint8_t maskOrient = 0;
 };
 
 const int WIDTH = 1000;
@@ -162,6 +194,8 @@ public:
         vector<uint8_t> strokeNumberArray;
         vector<uint8_t> serveStrokeNumberArray;
 
+        Mask rightMask,leftMask,upMask,downMask,urMask,ulMask,drMask,dlMask;
+
         void Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML);
         unsigned char imageTemp[HEIGHT][WIDTH];
         //判断点是否为轮廓点
@@ -172,10 +206,12 @@ public:
         void buildNewImageBuffer(unsigned char (&image)[HEIGHT][WIDTH]);
         //按照汉字笔画,给点队列排序构成路径
         void sortPointQueue(int i, int j, bool is_firstLayer);
-        void sortPointQueueByXML(const char* strokeName);
+        void sortPointQueueByXML(uint8_t strokeNum);
         //读取笔画顺序
         bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode);
         bool GetStrokeMsg(XMLElement* destNode);
+
+        bool isMaskMatch(Mask mask,float x_scale,float y_scale,int i, int j);
 
         void strokeRecognize();
 	
@@ -184,16 +220,103 @@ private:
 };
 void Recognize::strokeRecognize()
 {
-    img = cv::imread( "./image/origin.png", cv::IMREAD_UNCHANGED );
-    templ = cv::imread( "./image/part.png", cv::IMREAD_UNCHANGED );
+    img = cv::imread( "/home/pi/catkin_qi/src/fam/src/image/singleLineText1.jpg", cv::IMREAD_UNCHANGED);
+    templ = cv::imread( "/home/pi/catkin_qi/src/fam/src/image/singleLineTextPart1.jpg", cv::IMREAD_UNCHANGED );
 
-    cv::namedWindow( image_window, cv::WINDOW_AUTOSIZE );
-    cv::namedWindow( result_window, cv::WINDOW_AUTOSIZE );
+    cv::namedWindow(image_window, cv::WINDOW_AUTOSIZE);
+    cv::namedWindow(result_window, cv::WINDOW_AUTOSIZE);
+    cv::namedWindow(compare_window, cv::WINDOW_AUTOSIZE);
+    cv::imshow(image_window, img);
 
-    const char* trackbar_label = "Method: \n 0: SQDIFF \n 1: SQDIFF NORMED \n 2: TM CCORR \n 3: TM CCORR NORMED \n 4: TM COEFF \n 5: TM COEFF NORMED";
-    cv::createTrackbar( trackbar_label, image_window, &match_method, max_Trackbar, MatchingMethod );
-    MatchingMethod( 0, 0 );
-    cv::waitKey(30);
+//--------------------------Line Detection------------------------------/
+//    cv::Mat mask = cv::Mat::ones( img.size(), CV_8UC1 );
+    vector<vector<cv::DMatch>> lmatches;
+    cv::Mat mLdesc,mLdesc2;
+    cv::Ptr<LSDDetector> lsd = LSDDetector::createLSDDetector();
+    cv::Ptr<BinaryDescriptor> lbd = BinaryDescriptor::createBinaryDescriptor();
+    vector<KeyLine> lines,linesPart;
+    cv::Mat output = img.clone();
+
+    lsd->detect( img, lines, 2, 1 );
+    lsd->detect( templ, linesPart, 2, 1 );
+
+    /* draw lines extracted from octave 0 */
+    if( output.channels() == 1 )
+      cv::cvtColor( output, output, cv::COLOR_GRAY2BGR );
+
+    if(lines.size()>lsdNFeatures)
+    {
+        sort(lines.begin(), lines.end(), sort_lines_by_response());
+        lines.resize(lsdNFeatures);
+        for( int i=0; i<lsdNFeatures; i++)
+            lines[i].class_id = i;
+    }
+    if(linesPart.size()>lsdNFeatures)
+    {
+        sort(linesPart.begin(), linesPart.end(), sort_lines_by_response());
+        linesPart.resize(lsdNFeatures);
+        for(int i=0; i<lsdNFeatures; i++)
+            linesPart[i].class_id = i;
+    }
+
+    lbd->compute(img, lines, mLdesc);
+    lbd->compute(templ,linesPart,mLdesc2);
+    cv::BFMatcher* bfm = new cv::BFMatcher(cv::NORM_HAMMING, false);
+    bfm->knnMatch(mLdesc, mLdesc2, lmatches, 2);
+    vector<cv::DMatch> matches;
+    for(size_t i=0;i<lmatches.size();i++)
+    {
+        const cv::DMatch& bestMatch = lmatches[i][0];
+        const cv::DMatch& betterMatch = lmatches[i][1];
+        float  distanceRatio = bestMatch.distance / betterMatch.distance;
+        if (distanceRatio < 0.5)
+            matches.push_back(bestMatch);
+    }
+    cv::Mat outImg;
+    std::vector<char> mask_1( lmatches.size(), 1 );
+    drawLineMatches( img, lines, templ, linesPart, matches, outImg, cv::Scalar::all( -1 ), cv::Scalar::all( -1 ), mask_1,
+                     DrawLinesMatchesFlags::DEFAULT );
+
+    cv::imshow(compare_window, outImg );
+    cv::waitKey(0);
+
+    for ( size_t i = 0; i < lines.size(); i++ )
+    {
+      KeyLine kl = lines[i];
+      if( kl.octave == 0)
+      {
+        /* get a random color */
+        int R = ( rand() % (int) ( 255 + 1 ) );
+        int G = ( rand() % (int) ( 255 + 1 ) );
+        int B = ( rand() % (int) ( 255 + 1 ) );
+
+        /* get extremes of line */
+        cv::Point pt1 = cv::Point2f( kl.startPointX, kl.startPointY );
+        cv::Point pt2 = cv::Point2f( kl.endPointX, kl.endPointY );
+
+        /* draw line */
+        line( output, pt1, pt2, cv::Scalar( B, G, R ), 3 );
+      }
+
+    }
+
+    /* show lines on image */
+//    cv::imshow( result_window, output );
+//    cv::waitKey(0);
+//--------------------------Point Detection------------------------------/
+/*  //SURF特征点检测
+    int minHessian = 400;
+    cv::Ptr<SURF> detector = SURF::create(minHessian);//创建一个surf类对象并初始化
+    vector<cv::KeyPoint> keypoints;
+    detector->detect(img, keypoints, cv::Mat());//找出关键点
+
+    // 绘制关键点
+    cv::Mat keypoint_img;
+    cv::drawKeypoints(img, keypoints, keypoint_img, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+    cv::imshow(result_window, keypoint_img);
+
+    cv::waitKey(0);
+*/
 }
 
 bool Recognize::GetStrokeMsg(XMLElement* destNode)
@@ -467,7 +590,7 @@ void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
 
         //使用插补,解决笔画中断问题, 在优先联接当前方向的前提下使用贪心算法
 
-        if(imageTemp[j][i+1] == 2){         //右方
+        if(imageTemp[j][i+1] == 2){                 //右方
             int n=1;
             int breakFlag = 0;
             for (;breakFlag == 0;n++){
@@ -543,14 +666,188 @@ void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
     }
 }
 
-void Recognize::sortPointQueueByXML(const char *strokeName)
+bool Recognize::isMaskMatch(Mask mask,float x_scale,float y_scale,int i, int j)
+{
+    i = (int)i*x_scale;
+    j = (int)j*y_scale;
+
+    if(mask.maskType == 0){
+        switch (mask.maskOrient) {
+        case 12:
+            for (int n = j;n>j-mask.y_length;n--) {
+                for (int m = i-mask.x_length/2;m<i+mask.x_length/2;m++) {
+                    if(imageTemp[n][m] == 2)
+                        return 1;
+                }
+            }
+            break;
+        case 3:
+            for (int m = i+1;m<i+mask.x_length;m++) {
+//                for (int n = j-mask.y_length/2;n<j+mask.y_length/2;n++) {
+                    if(imageTemp[j][m+1] == 2 && imageTemp[j][m+2] == 2 && imageTemp[j][m+3] == 2)
+                        return 1;
+//                }
+            }
+            break;
+        case 6:
+            for (int n = j;n<j+mask.y_length;n++) {
+                for (int m = i-mask.x_length/2;m<i+mask.x_length/2;m++) {
+                    if(imageTemp[j][m] == 2)
+                        return 1;
+                }
+            }
+            break;
+        case 9:
+            for (int m = i-1;m>i-mask.x_length;m--) {
+//                for (int n = j-mask.y_length/2;n<j+mask.y_length/2;n++) {
+                    if(imageTemp[j][m] == 2)
+                        return 1;
+//                }
+            }
+            break;
+        }
+    }else {
+        switch (mask.maskOrient) {
+        case 12:
+            for (int m = i+1;m<i+mask.x_length;m++) {
+                for (int n = j-1;n>j-mask.y_length;n--) {
+                    if(imageTemp[n][m] == 2)
+                        return 1;
+                }
+            }
+            break;
+        case 3:
+            for (int m = i+1;m<i+mask.x_length;m++) {
+                for (int n = j+1;n<j+mask.y_length;n++) {
+                    if(imageTemp[n][m] == 2){
+//                        ROS_INFO("%d %d", i, j);
+                        return 1;
+                    }
+                }
+            }
+            break;
+        case 6:
+            for (int m = i-1;m>i-mask.x_length;m--) {
+                for (int n = j+1;n<j+mask.y_length;n++) {
+                    if(imageTemp[n][m] == 2)
+                        return 1;
+                }
+            }
+            break;
+        case 9:
+            for (int m = i-1;m>i-mask.x_length;m--) {
+                for (int n = j-1;n>j-mask.y_length;n--) {
+                    if(imageTemp[n][m] == 2)
+                        return 1;
+                }
+            }
+            break;
+        }
+    }
+    return 0;
+}
+
+void Recognize::sortPointQueueByXML(uint8_t strokeNum)
 {
 
-    ROS_INFO("%s",strokeName);
+    setlocale(LC_ALL,"zh_CN.UTF-8");
+    for(map<const char*,uint8_t>::iterator it = strokeMap.begin();it!=strokeMap.end();it++)
+    {
+        if(it->second==strokeNum)
+            ROS_INFO("Trying to Find stroke '%s'",it->first);
+    }
+    bool reachEnd = 0;
+    switch (strokeNum) {
+    case 0://点
+        for (int j = 0;j < HEIGHT && !reachEnd;j++)
+        {
+            for(int i = 0; i < WIDTH && !reachEnd; i++)
+            {
+                if(imageTemp[j][i] == 2 && isMaskMatch(drMask,1,1,i,j) && !isMaskMatch(dlMask,1,1,i,j) && !isMaskMatch(ulMask,1,1,i,j) && !isMaskMatch(urMask,1,1,i,j)){
+                    ROS_INFO("Find '点' at x:%d y:%d",  i ,j);
+                    sortPointQueue(i,j,1);
+                    reachEnd = 1;
+                }
+            }
+        }
+        break;
+    case 1:
+        break;
+    case 2://横
+        for (int j = 0;j < HEIGHT && !reachEnd;j++)
+        {
+            for(int i = 0; i < WIDTH && !reachEnd; i++)
+            {
+                if(imageTemp[j][i] == 2 && isMaskMatch(rightMask,1,1,i,j) && !isMaskMatch(leftMask,1,1,i,j)){
+                    ROS_INFO("Find '横' at x:%d y:%d",  i ,j);
+                    sortPointQueue(i,j,1);
+                    reachEnd = 1;
+                }
+            }
+        }
+        break;
+    case 3:
+        break;
+    case 4:
+        break;
+    case 5:
+        break;
+    case 6:
+        break;
+    case 7:
+        break;
+    case 8:
+        break;
+    case 9:
+        break;
+    case 10:
+        break;
+    case 11:
+        break;
+    case 12:
+        break;
+    case 13:
+        break;
+    case 14:
+        break;
+    case 15:
+        break;
+    case 16:
+        break;
+    case 17:
+        break;
+    case 18:
+        break;
+    case 19:
+        break;
+    case 20:
+        break;
+    case 21:
+        break;
+    case 22:
+        break;
+    case 23:
+        break;
+    case 24:
+        break;
+    case 25:
+        break;
+    case 26:
+        break;
+    case 27:
+        break;
+    case 28:
+        break;
+    case 29:
+        break;
+    case 30:
+        break;
+    case 31:
+        break;
+    }
 }
 void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 {
-    strokeRecognize();
 
     findPath(image);
     buildNewImageBuffer(image);
@@ -565,7 +862,6 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 
     //from up to bottom and from left to right to travelse
     if(is_UseXML){
-        //排序前对笔画按照复杂到简单的排序
         while (strokeQueue.phead->next) {
             ROS_INFO("num %d:the stroke is '%s' which have %d point(s) the stroke number is %d",
                      strokeQueue.phead->next->value.orderNum,strokeQueue.phead->next->value.strokeName,strokeQueue.phead->next->value.strokePointNum
@@ -574,6 +870,7 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
             serveStrokeNumberArray.push_back(strokeMap[(char*)strokeQueue.phead->next->value.strokeName]);
             strokeQueue.pop();
         }
+        //排序前对笔画按照复杂到简单的排序
         for (int i = 0,temp = 0;i<serveStrokeNumberArray.size();i++) {
             temp = serveStrokeNumberArray[i];
             for (int j =i;j<serveStrokeNumberArray.size();j++) {
@@ -588,12 +885,7 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
         Node<Stroke> *pStroke = strokeQueue.phead->next;
         //按照笔画复杂程度顺序分别在点数组中匹配相应的笔画
         for (int i = 0;i<serveStrokeNumberArray.size();i++) {
-
-            for(map<const char*,uint8_t>::iterator it = strokeMap.begin();it!=strokeMap.end();it++)
-            {
-                if(it->second==serveStrokeNumberArray[i])
-                    sortPointQueueByXML(it->first);
-            }
+            sortPointQueueByXML(serveStrokeNumberArray[i]);
         }
 
         serveStrokeNumberArray.clear();
@@ -650,6 +942,19 @@ Recognize::Recognize()
     strokeMap["横折折折"] = 29;
     strokeMap["竖折折钩"] = 30;
     strokeMap["横折折折钩"] = 31;
+
+    rightMask.maskType = leftMask.maskType = upMask.maskType = downMask.maskType = 0;
+    urMask.maskType = ulMask.maskType = drMask.maskType = dlMask.maskType = 1;
+    rightMask.maskOrient = 3;
+    rightMask.y_length = 0;
+    leftMask.maskOrient = 9;
+    leftMask.y_length = 0;
+    upMask.maskOrient = 12;
+    downMask.maskOrient = 6;
+    urMask.maskOrient = 12;
+    ulMask.maskOrient = 9;
+    drMask.maskOrient = 3;
+    dlMask.maskOrient = 6;
 }
 
 Recognize::~Recognize()

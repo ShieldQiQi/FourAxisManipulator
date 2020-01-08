@@ -139,11 +139,13 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     points.action = visualization_msgs::Marker::ADD;
     points.pose.orientation.w = 1.0;
     points.id = 0;
-    points.type = visualization_msgs::Marker::POINTS;
+    points.type = visualization_msgs::Marker::SPHERE_LIST;
     // POINTS markers use x and y scale for width/height respectively
     points.scale.x = 0.0032;
     points.scale.y = 0.0032;
     // Points are green
+    points.color.r = 1.0f;
+    points.color.g = 1.0f;
     points.color.b = 1.0f;
     points.color.a = 1.0;
 
@@ -169,9 +171,9 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     pointWork.id = 0;
     pointWork.type = visualization_msgs::Marker::POINTS;
     // POINTS markers use x and y scale for width/height respectively
-    pointWork.scale.x = 0.0032;
-    pointWork.scale.y = 0.0032;
-    pointWork.color.g = 1.0f;
+    pointWork.scale.x = 0.0128;
+    pointWork.scale.y = 0.0128;
+    pointWork.color.b = 1.0f;
     pointWork.color.a = 1.0;
 
     pointIdeal.header.frame_id  = "/textFrame";
@@ -199,7 +201,37 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     {
         for(int j =0; j< HEIGHT;j++)
         {
-            if(image[j][i] == 1 || i == 130 || (j == HEIGHT-1 && i<=130)|| i == 0 || (j == 0 && i<=130)){
+            if(image[j][i] == 3 || i == 130 || (j == HEIGHT-1 && i<=130)|| i == 0 || (j == 0 && i<=130)){
+                //插值,使得笔画更加连续
+//                if(image[j+1][i] == 3){
+//                    for (int delta = 1;delta<4;delta++) {
+//                        p.x = 0.012*(j+delta/4.0);
+//                        p.y = 0.012*i;
+//                        points.points.push_back(p);
+//                    }
+//                }
+//                if(image[j][i+1] == 3){
+//                    for (int delta = 1;delta<4;delta++) {
+//                        p.x = 0.012*j;
+//                        p.y = 0.012*(i+delta/4.0);
+//                        points.points.push_back(p);
+//                    }
+//                }
+//                if(image[j+1][i+1] == 3){
+//                    for (int delta = 1;delta<6;delta++) {
+//                        p.x = 0.012*(j+delta/6.0);
+//                        p.y = 0.012*(i+delta/6.0);
+//                        points.points.push_back(p);
+//                    }
+//                }
+//                if(image[j+1][i-1] == 3){
+//                    for (int delta = 1;delta<6;delta++) {
+//                        p.x = 0.012*(j+delta/6.0);
+//                        p.y = 0.012*(i-delta/6.0);
+//                        points.points.push_back(p);
+//                    }
+//                }
+
                 p.x = 0.012*(j-0);
                 p.y = 0.012*i;
                 p.z = 0;

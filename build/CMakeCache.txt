@@ -267,9 +267,6 @@ LSB_RELEASE_EXECUTABLE:FILEPATH=/usr/bin/lsb_release
 //Path to a program.
 NOSETESTS:FILEPATH=/usr/bin/nosetests-2.7
 
-//The directory containing a CMake configuration file for PCL.
-PCL_DIR:PATH=PCL_DIR-NOTFOUND
-
 //Path to a program.
 PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python
 
@@ -937,12 +934,6 @@ catkin_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/catkin
 cpp_common_DIR:PATH=/opt/ros/kinetic/share/cpp_common/cmake
 
 //Value Computed by CMake
-fam.SLDASM_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/model
-
-//Value Computed by CMake
-fam.SLDASM_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/model
-
-//Value Computed by CMake
 fam_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/fam
 
 //Value Computed by CMake
@@ -991,18 +982,6 @@ model_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/model
 model_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/model
 
 //Value Computed by CMake
-pcl_conversions_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/perception_pcl/pcl_conversions
-
-//Value Computed by CMake
-pcl_conversions_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/perception_pcl/pcl_conversions
-
-//Value Computed by CMake
-perception_pcl_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/perception_pcl/perception_pcl
-
-//Value Computed by CMake
-perception_pcl_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/perception_pcl/perception_pcl
-
-//Value Computed by CMake
 qt_build_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/qt_ros/qt_build
 
 //The directory containing a CMake configuration file for qt_build.
@@ -1018,12 +997,6 @@ qt_create_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/qt_ros/qt_create
 qt_create_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/qt_ros/qt_create
 
 //Value Computed by CMake
-qt_gui_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/qtui
-
-//Value Computed by CMake
-qt_gui_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/qtui
-
-//Value Computed by CMake
 qt_ros_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/qt_ros/qt_ros
 
 //Value Computed by CMake
@@ -1034,12 +1007,6 @@ qt_tutorials_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/qt_ros/qt_tutorials
 
 //Value Computed by CMake
 qt_tutorials_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/qt_ros/qt_tutorials
-
-//Value Computed by CMake
-qtguiDemo_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/qtguiDemo
-
-//Value Computed by CMake
-qtguiDemo_SOURCE_DIR:STATIC=/home/pi/catkin_qi/src/qtguiDemo
 
 //Value Computed by CMake
 qtui_BINARY_DIR:STATIC=/home/pi/catkin_qi/build/qtui
