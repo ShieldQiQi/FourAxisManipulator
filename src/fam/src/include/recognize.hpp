@@ -173,7 +173,7 @@ struct Mask
     uint8_t maskOrient = 0;
 };
 
-const int WIDTH = 1000;
+const int WIDTH = 400;
 const int HEIGHT = 150;
 
 //-------------------------------------------------------------------------------------
@@ -211,7 +211,7 @@ public:
         bool GetNodePointerByName(XMLElement* pRootEle, const char* strNodeName,XMLElement* &destNode);
         bool GetStrokeMsg(XMLElement* destNode);
 
-        bool isMaskMatch(Mask mask,float x_scale,float y_scale,int i, int j);
+        bool isMaskMatch(Mask mask, float x_scale, float y_scale, int i, int j, uint8_t layerNum);
 
         void strokeRecognize();
 	
@@ -666,10 +666,10 @@ void Recognize::sortPointQueue(int i, int j, bool is_firstLayer)
     }
 }
 
-bool Recognize::isMaskMatch(Mask mask,float x_scale,float y_scale,int i, int j)
+bool Recognize::isMaskMatch(Mask mask,float x_scale,float y_scale,int i, int j,uint8_t layerNum)
 {
-    i = (int)i*x_scale;
-    j = (int)j*y_scale;
+    mask.x_length = (uint8_t)mask.x_length*x_scale;
+    mask.y_length = (uint8_t)mask.y_length*y_scale;
 
     if(mask.maskType == 0){
         switch (mask.maskOrient) {
@@ -717,12 +717,10 @@ bool Recognize::isMaskMatch(Mask mask,float x_scale,float y_scale,int i, int j)
             }
             break;
         case 3:
+            ROS_INFO("%d",layerNum);
             for (int m = i+1;m<i+mask.x_length;m++) {
                 for (int n = j+1;n<j+mask.y_length;n++) {
-                    if(imageTemp[n][m] == 2){
-//                        ROS_INFO("%d %d", i, j);
-                        return 1;
-                    }
+                            return 1;
                 }
             }
             break;
@@ -759,38 +757,16 @@ void Recognize::sortPointQueueByXML(uint8_t strokeNum)
     bool reachEnd = 0;
     switch (strokeNum) {
     case 0://点
-        for (int j = 0;j < HEIGHT && !reachEnd;j++)
-        {
-            for(int i = 0; i < WIDTH && !reachEnd; i++)
-            {
-                if(imageTemp[j][i] == 2 && isMaskMatch(drMask,1,1,i,j) && !isMaskMatch(dlMask,1,1,i,j) && !isMaskMatch(ulMask,1,1,i,j) && !isMaskMatch(urMask,1,1,i,j)){
-                    ROS_INFO("Find '点' at x:%d y:%d",  i ,j);
-                    sortPointQueue(i,j,1);
-                    reachEnd = 1;
-                }
-            }
-        }
         break;
     case 1:
         break;
     case 2://横
-        for (int j = 0;j < HEIGHT && !reachEnd;j++)
-        {
-            for(int i = 0; i < WIDTH && !reachEnd; i++)
-            {
-                if(imageTemp[j][i] == 2 && isMaskMatch(rightMask,1,1,i,j) && !isMaskMatch(leftMask,1,1,i,j)){
-                    ROS_INFO("Find '横' at x:%d y:%d",  i ,j);
-                    sortPointQueue(i,j,1);
-                    reachEnd = 1;
-                }
-            }
-        }
         break;
     case 3:
         break;
-    case 4:
+    case 4://撇
         break;
-    case 5:
+    case 5://捺
         break;
     case 6:
         break;

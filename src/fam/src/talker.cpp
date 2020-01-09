@@ -27,7 +27,7 @@
 #include "./include/recognize.hpp"
 #include "./include/inverseSolutonKiller.hpp"
 
-#define WIDTH   1000
+#define WIDTH   400
 #define HEIGHT  150
 unsigned char image[HEIGHT][WIDTH];
 unsigned char imageBuffer[HEIGHT][WIDTH];
@@ -141,8 +141,8 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     points.id = 0;
     points.type = visualization_msgs::Marker::SPHERE_LIST;
     // POINTS markers use x and y scale for width/height respectively
-    points.scale.x = 0.0032;
-    points.scale.y = 0.0032;
+    points.scale.x = 0.0064;
+    points.scale.y = 0.0064;
     // Points are green
     points.color.r = 1.0f;
     points.color.g = 1.0f;
