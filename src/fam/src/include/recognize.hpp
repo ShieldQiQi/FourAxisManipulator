@@ -23,6 +23,7 @@
 #include <opencv2/opencv_modules.hpp>
 #include <opencv2/line_descriptor.hpp>
 #include <opencv2/core/utility.hpp>
+#include <visualization_msgs/Marker.h>
 
 using namespace tinyxml2;
 using namespace cv::xfeatures2d;
@@ -176,6 +177,8 @@ struct Mask
 const int WIDTH = 400;
 const int HEIGHT = 150;
 
+
+visualization_msgs::Marker pointMaster;
 //-------------------------------------------------------------------------------------
 //Stroke recognizer
 class Recognize
@@ -321,6 +324,23 @@ void Recognize::strokeRecognize()
 
 bool Recognize::GetStrokeMsg(XMLElement* destNode)
 {
+    pointMaster.points.clear();
+    pointMaster.header.frame_id  = "/textFrame";
+    pointMaster.header.stamp = ros::Time::now();
+    pointMaster.ns = "textPoints4";
+    pointMaster.action = visualization_msgs::Marker::ADD;
+    pointMaster.pose.orientation.w = 1.0;
+    pointMaster.id = 0;
+    pointMaster.type = visualization_msgs::Marker::POINTS;
+    // POINTS markers use x and y scale for width/height respectively
+    pointMaster.scale.x = 0.0128;
+    pointMaster.scale.y = 0.0128;
+    // Points are green
+    pointMaster.color.r = 1.0f;
+    pointMaster.color.a = 1.0;
+
+    geometry_msgs::Point p;
+
     strokeQueue.ClearQueue();
 
     XMLElement* pEle = destNode;
@@ -339,11 +359,35 @@ bool Recognize::GetStrokeMsg(XMLElement* destNode)
     for(pEle = destNode->NextSiblingElement()->FirstChildElement();pEle;pEle = pEle->NextSiblingElement())
     {
         Point pointTemp;
+        Point pointTrajectory;
+        pointTemp.x = 0;
 
         for(pointcount = 0,pEleDeeper = pEle->FirstChildElement();pEleDeeper;pEleDeeper = pEleDeeper->NextSiblingElement())
         {
+            if(pointTemp.x){
+                int pointTempNum = sqrt(pow(atoi(pEleDeeper->Attribute("x")) - pointTemp.x,2)+pow(atoi(pEleDeeper->Attribute("y")) - pointTemp.y,2))/20;
+
+                for (int delta = 1;delta < pointTempNum; delta++) {
+                    p.y = 0.0016*(pointTemp.x+20.0*delta*((atoi(pEleDeeper->Attribute("x")) - pointTemp.x)/sqrt(pow(atoi(pEleDeeper->Attribute("x")) - pointTemp.x,2)+pow(atoi(pEleDeeper->Attribute("y")) - pointTemp.y,2))));
+                    p.x = 0.0016*(pointTemp.y+20.0*delta*((atoi(pEleDeeper->Attribute("y")) - pointTemp.y)/sqrt(pow(atoi(pEleDeeper->Attribute("x")) - pointTemp.x,2)+pow(atoi(pEleDeeper->Attribute("y")) - pointTemp.y,2))));
+                    pointMaster.points.push_back(p);
+                    pointTrajectory.x = p.y/0.012;
+                    pointTrajectory.y = p.x/0.012;
+                    pointQueue.push(pointTrajectory);
+                }
+            }
+
             pointTemp.x = atoi(pEleDeeper->Attribute("x"));
             pointTemp.y = atoi(pEleDeeper->Attribute("y"));
+
+            p.x = 0.0016*pointTemp.y;
+            p.y = 0.0016*pointTemp.x;
+            pointTrajectory.x = 0.0016/0.012*pointTemp.x;
+            pointTrajectory.y = 0.0016/0.012*pointTemp.y;
+
+            pointMaster.points.push_back(p);
+            pointQueue.push(pointTrajectory);
+
             pStroke->value.strokePointQueue.push(pointTemp);
             pointcount++;
         }
@@ -825,8 +869,8 @@ void Recognize::sortPointQueueByXML(uint8_t strokeNum)
 void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
 {
 
-    findPath(image);
-    buildNewImageBuffer(image);
+//    findPath(image);
+//    buildNewImageBuffer(image);
     for (int j =0;j < HEIGHT;j++)
     {
         for(int i = 0; i < WIDTH; i++)
@@ -842,6 +886,7 @@ void Recognize::Analyse(unsigned char (&image)[HEIGHT][WIDTH],bool is_UseXML)
             ROS_INFO("num %d:the stroke is '%s' which have %d point(s) the stroke number is %d",
                      strokeQueue.phead->next->value.orderNum,strokeQueue.phead->next->value.strokeName,strokeQueue.phead->next->value.strokePointNum
                      ,strokeMap[(char*)strokeQueue.phead->next->value.strokeName]);
+
             strokeNumberArray.push_back(strokeMap[(char*)strokeQueue.phead->next->value.strokeName]);
             serveStrokeNumberArray.push_back(strokeMap[(char*)strokeQueue.phead->next->value.strokeName]);
             strokeQueue.pop();

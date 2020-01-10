@@ -100,6 +100,7 @@ void QNode::run() {
                             std_msgs::String stringTemp;
                             stringTemp.data = this->textString.data.substr(0, 3);
                             textString_publisher.publish(stringTemp);
+                            ROS_INFO("I send %s",stringTemp.data);
 
                             this->textString.data.erase(0,3);
 

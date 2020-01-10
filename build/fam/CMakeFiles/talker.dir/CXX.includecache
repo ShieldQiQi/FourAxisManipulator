@@ -47,6 +47,8 @@ opencv2/line_descriptor.hpp
 -
 opencv2/core/utility.hpp
 -
+visualization_msgs/Marker.h
+-
 
 /home/pi/catkin_qi/src/fam/src/./include/tinyxml2.hpp
 ctype.h
@@ -120,8 +122,6 @@ wchar.h
 stdlib.h
 -
 locale.h
--
-visualization_msgs/Marker.h
 -
 cmath
 -

@@ -21,7 +21,6 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <locale.h>
-#include <visualization_msgs/Marker.h>
 #include <cmath>
 #include <tf/transform_broadcaster.h>
 #include "./include/recognize.hpp"
@@ -61,7 +60,6 @@ serial::Serial ser; //声明串口对象
 visualization_msgs::Marker points;
 visualization_msgs::Marker pointWork;
 visualization_msgs::Marker pointIdeal;
-visualization_msgs::Marker pointMaster;
 geometry_msgs::Point p;
 
 inverseSolutionKiller soluKiller;
@@ -121,7 +119,7 @@ std::wstring s2ws(const std::string& s)
 
 //---------------------------------------------------
 //更新文字在RVIZ中的显示
-void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointWork,visualization_msgs::Marker &pointMaster)
+void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker &pointWork)
 {
     setlocale(LC_ALL,"zh_CN.UTF-8");
 
@@ -130,7 +128,6 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     travelQueue.ClearQueue();
     travelQueueIdeal.ClearQueue();
     pointWork.points.clear();
-    pointMaster.points.clear();
     pointIdeal.points.clear();
 
     points.header.frame_id  = "/textFrame";
@@ -149,20 +146,6 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     points.color.b = 1.0f;
     points.color.a = 1.0;
 
-    pointMaster.header.frame_id  = "/textFrame";
-    pointMaster.header.stamp = ros::Time::now();
-    pointMaster.ns = "textPoints4";
-    pointMaster.action = visualization_msgs::Marker::ADD;
-    pointMaster.pose.orientation.w = 1.0;
-    pointMaster.id = 0;
-    pointMaster.type = visualization_msgs::Marker::POINTS;
-    // POINTS markers use x and y scale for width/height respectively
-    pointMaster.scale.x = 0.0256;
-    pointMaster.scale.y = 0.0256;
-    // Points are green
-    pointMaster.color.r = 1.0f;
-    pointMaster.color.a = 1.0;
-
     pointWork.header.frame_id  = "/textFrame";
     pointWork.header.stamp = ros::Time::now();
     pointWork.ns = "textPoints";
@@ -171,8 +154,8 @@ void updatePoints(visualization_msgs::Marker &points,visualization_msgs::Marker 
     pointWork.id = 0;
     pointWork.type = visualization_msgs::Marker::POINTS;
     // POINTS markers use x and y scale for width/height respectively
-    pointWork.scale.x = 0.0128;
-    pointWork.scale.y = 0.0128;
+    pointWork.scale.x = 0.0256;
+    pointWork.scale.y = 0.0256;
     pointWork.color.b = 1.0f;
     pointWork.color.a = 1.0;
 
@@ -346,7 +329,7 @@ void readTextString_callback(std_msgs::String textString)
     //show_image();
     //getOutline();
     imageBinarization();
-    updatePoints(points,pointWork,pointMaster);
+    updatePoints(points,pointWork);
 
     pen.x = 15 * 64;
     pen.y = ( target_height - 100 ) * 64;
@@ -422,8 +405,8 @@ void updateAngles(const ros::TimerEvent& e)
             temp.data = 1;
             read_pub.publish(temp);
     }
-    temp.data = 1;
-    read_pub.publish(temp);
+//    temp.data = 1;
+//    read_pub.publish(temp);
     //发送报文内容
     if(axisAngles.data.at(6) == 0 && !travelQueueIdeal.isEmpty()){
 
@@ -432,7 +415,7 @@ void updateAngles(const ros::TimerEvent& e)
         //定义报文头,用于底层判断轴角顺序
         s_buffer[0] = 255;
         s_buffer[1] = 255;
-//        ser.write(s_buffer,2);
+        ser.write(s_buffer,2);
 
         s_buffer[0] = (uint8_t)(soluKiller.angleArray[0]/3.14159*180+180);
         s_buffer[1] = (uint8_t)((uint16_t(soluKiller.angleArray[0]/3.14159*180+180)) >> 8);
@@ -446,7 +429,7 @@ void updateAngles(const ros::TimerEvent& e)
         s_buffer[9] = (uint8_t)((uint16_t(soluKiller.angleArray[4]/3.14159*180+180)) >> 8);
         s_buffer[10] = (uint8_t)(soluKiller.angleArray[5]/3.14159*180+180);
         s_buffer[11] = (uint8_t)((uint16_t(soluKiller.angleArray[5]/3.14159*180+180)) >> 8);
-//        ser.write(s_buffer,12);
+        ser.write(s_buffer,12);
 
 //        ROS_INFO("-----------\nI Send:theta1 %f theta2 %f theta3 %f theta4 %f",
 //                 soluKiller.angleArray[0]/3.14159*180,soluKiller.angleArray[1]/3.14159*180,soluKiller.angleArray[2]/3.14159*180,
@@ -567,9 +550,9 @@ int main (int argc, char** argv)
         broadcaster.sendTransform(tf::StampedTransform( tf::Transform(tf::Quaternion(0, 0, 0, 1),
                                                                 tf::Vector3(0.0, 0.0, 0.0)),ros::Time::now(),"map", "textFrame"));
         //定时更新汉字在RVIZ中的显示
-        if(index==15)
+        if(index==15){
             marker_pub.publish(points);
-        else if (index ==30) {
+        }else if (index ==30) {
             marker_pub.publish(pointWork);
         }else if (index ==45) {
             marker_pub.publish(pointIdeal);
